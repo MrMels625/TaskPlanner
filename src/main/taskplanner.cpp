@@ -1,5 +1,5 @@
-#include "taskplanner.h"
-#include "./ui_taskplanner.h"
+#include "taskplanner.hpp"
+#include "ui_taskplanner.h"
 
 TaskPlanner::TaskPlanner(QWidget *parent)
     : QMainWindow(parent)

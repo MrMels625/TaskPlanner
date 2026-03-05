@@ -13,10 +13,10 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 set(PROJECT_SOURCES
-        main.cpp
-        taskplanner.cpp
-        taskplanner.h
-        taskplanner.ui
+    src/main/main.cpp
+    src/main/taskplanner.cpp
+    src/main/taskplanner.hpp
+    src/main/taskplanner.ui
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
