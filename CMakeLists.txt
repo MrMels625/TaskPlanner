@@ -23,7 +23,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(TaskPlanner
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-
+        src/storage/task.hpp
+        src/storage/istorage.hpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET TaskPlanner APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
