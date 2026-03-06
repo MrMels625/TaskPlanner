@@ -10,11 +10,20 @@ namespace controller
   class IController: public QObject
   {
     Q_OBJECT
+
   public:
     virtual ~IController() = default;
-    virtual void setStorage(storage::IStorage* storage) = 0;
-    virtual void setView(view::IView* view) = 0;
+    virtual void setStorage(storage::IStorage *storage) = 0;
+    virtual void setView(view::IView *view) = 0;
     virtual void start() = 0;
+
+  private slots:
+    void handleTaskAddRequest(const storage::Task &task);
+    void handleDateSelection(const QDate &date);
+    //НЕ СКОМПИЛИРУЕТСЯ, потому что нет определений класса Task
+
+  private:
+    bool validateTask(const storage::Task &task);
   };
 }
 
