@@ -20,7 +20,7 @@ namespace storage
     bool completed;
     QList< QString > tags;
 
-    Task();
+    Task() = default;
     bool operator<(const Task &other) const;
   };
 }
