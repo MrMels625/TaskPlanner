@@ -22,7 +22,6 @@ namespace view
     void taskDeletedRequest(int taskId);
     void dateSelected(const QDate &date);
     void viewReady();
-    //НЕ СКОМПИЛИРУЕТСЯ, потому что сигналы нет нужных определений класса Task
   };
 }
 

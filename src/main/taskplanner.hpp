@@ -12,7 +12,7 @@ QT_END_NAMESPACE
 
 class TaskPlanner: public QMainWindow
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
   TaskPlanner(QWidget *parent = nullptr);

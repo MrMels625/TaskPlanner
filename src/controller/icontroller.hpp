@@ -17,10 +17,9 @@ namespace controller
     virtual void setView(view::IView *view) = 0;
     virtual void start() = 0;
 
-  private slots:
-    void handleTaskAddRequest(const storage::Task &task);
-    void handleDateSelection(const QDate &date);
-    //НЕ СКОМПИЛИРУЕТСЯ, потому что нет определений класса Task
+//  private slots:
+//    void handleTaskAddRequest(const storage::Task &task);
+//    void handleDateSelection(const QDate &date);
 
   private:
     bool validateTask(const storage::Task &task);
