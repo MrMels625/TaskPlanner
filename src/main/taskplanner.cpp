@@ -1,14 +1,14 @@
-#include "taskplanner.hpp"
+#include "taskplanner.h"
 #include "ui_taskplanner.h"
 
-TaskPlanner::TaskPlanner(QWidget *parent):
-  QMainWindow(parent),
-  ui(new Ui::TaskPlanner)
+TaskPlanner::TaskPlanner(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::TaskPlanner)
 {
-  ui->setupUi(this);
+    ui->setupUi(this);
 }
 
 TaskPlanner::~TaskPlanner()
 {
-  delete ui;
+    delete ui;
 }
