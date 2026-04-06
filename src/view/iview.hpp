@@ -4,6 +4,7 @@
 #include <QDate>
 #include <QList>
 #include <QObject>
+#include "../storage/istorage.hpp"
 #include "../storage/task.hpp"
 
 namespace view
