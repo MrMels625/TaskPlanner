@@ -1,14 +1,13 @@
 #ifndef MEMORYSTORAGE_HPP
 #define MEMORYSTORAGE_HPP
-
 #include "istorage.hpp"
 #include "task.hpp"
 
 namespace storage
 {
-class MemoryStorage: public IStorage
-{
-public:
+  class MemoryStorage: public IStorage
+  {
+  public:
     MemoryStorage();
 
     void addTask(const Task &task) override;
@@ -25,10 +24,10 @@ public:
     void saveToFile(const QString &path) override;
     void loadFromFile(const QString &path) override;
 
-private:
+  private:
     QList< Task > tasks_;
     int nextId_;
-};
+  };
 }
 
 #endif

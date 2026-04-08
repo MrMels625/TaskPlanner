@@ -1,6 +1,5 @@
 #ifndef ISTORAGE_H
 #define ISTORAGE_H
-
 #include "task.hpp"
 
 namespace storage

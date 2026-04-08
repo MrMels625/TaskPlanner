@@ -7,10 +7,10 @@
 
 namespace storage
 {
-enum class Priority;
+  enum class Priority;
 
-struct Task
-{
+  struct Task
+  {
     int id;
     QString name;
     QString description;
@@ -24,7 +24,7 @@ struct Task
 
     bool operator<(const Task &other) const;
     bool operator==(const Task &other) const;
-};
+  };
 }
 
 #endif
