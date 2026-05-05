@@ -41,8 +41,10 @@ namespace storage
     virtual QList< Task > getOverdueTasks() const = 0;
     virtual QList< Task > getTasksFiltered(const QString &searchText, bool today, bool overdue, Priority priority) const = 0;
     virtual QList< Task > getSortedTasks(const QList< Task > &tasks, Criterion criterion) const = 0;
-    virtual void saveToFile(const QString &path) = 0;
-    virtual void loadFromFile(const QString &path) = 0;
+
+  private:
+    virtual void saveToFile() noexcept = 0;
+    virtual void loadFromFile() noexcept = 0;
   };
 }
 

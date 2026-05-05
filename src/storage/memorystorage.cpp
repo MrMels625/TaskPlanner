@@ -45,7 +45,7 @@ namespace
     QDate currentDate;
 
     TaskFilter(const QString &search, bool t, bool o, storage::Priority p):
-     searchText(search),
+      searchText(search),
       today(t),
       overdue(o),
       priority(p),
@@ -87,25 +87,18 @@ storage::MemoryStorage::MemoryStorage():
 void storage::MemoryStorage::addTask(const Task &task)
 {
   Task newTask = task;
-  if (newTask.id <= 0)
-  {
-    newTask.id = nextId_++;
-  }
-  else if (newTask.id >= nextId_)
-  {
-    nextId_ = newTask.id + 1;
-  }
+  newTask.id = nextId_++;
   tasks_.append(newTask);
 }
 
 void storage::MemoryStorage::removeTask(int id)
 {
-  for (int i = 0; i < tasks_.size(); ++i)
+  for (size_t i = 0; i < tasks_.size(); ++i)
   {
     if (tasks_[i].id == id)
     {
       tasks_.removeAt(i);
-      break;
+      return;
     }
   }
 }
@@ -117,7 +110,7 @@ void storage::MemoryStorage::updateTask(const Task &task)
     if (t.id == task.id)
     {
       t = task;
-      break;
+      return;
     }
   }
 }
@@ -173,10 +166,10 @@ QList< storage::Task > storage::MemoryStorage::getSortedTasks(const QList< Task 
   return result;
 }
 
-void storage::MemoryStorage::saveToFile(const QString &path)
+void storage::MemoryStorage::saveToFile() noexcept
 {
 }
 
-void storage::MemoryStorage::loadFromFile(const QString &path)
+void storage::MemoryStorage::loadFromFile() noexcept
 {
 }
