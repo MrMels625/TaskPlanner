@@ -8,19 +8,19 @@
 namespace controller
 {
 
-  class Controller: public IController
-  {
+class Controller: public IController
+{
     Q_OBJECT
 
-  public:
-    explicit Controller(QObject *parent);
+public:
+    explicit Controller(QObject *parent = nullptr);
     ~Controller() override = default;
 
     void setStorage(storage::IStorage *storage) override;
     void setView(view::IView *view) override;
     void start() override;
 
-  public slots:
+public slots:
     void onViewReady() override;
     void onTaskAddRequested(const storage::Task &task) override;
     void onTaskEditRequested(int taskId) override;
@@ -31,10 +31,19 @@ namespace controller
     void onSortRequested(storage::Criterion criterion) override;
     void onFilterChanged(storage::Filter filter, const QVariant &value) override;
 
-  private:
+private:
+    bool checkReady() const;
+    bool validateTask(const storage::Task &task) const;
+    void connectSignals();
+    void refreshView();
+
     storage::IStorage *m_storage;
     view::IView *m_view;
-  };
+
+    storage::Filter m_activeFilter;
+    QVariant m_filterValue;
+    storage::Criterion m_activeCriterion;
+};
 
 }
 
