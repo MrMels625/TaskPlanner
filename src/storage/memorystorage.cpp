@@ -115,7 +115,7 @@ void storage::MemoryStorage::updateTask(const Task &task)
   }
 }
 
-QList< storage::Task > storage::MemoryStorage::getAllTasks() const
+QList< storage::Task > storage::MemoryStorage::getAllTasks() const noexcept
 {
   return tasks_;
 }
@@ -159,7 +159,7 @@ QList< storage::Task > storage::MemoryStorage::getTasksFiltered(const QString &s
   return result;
 }
 
-QList< storage::Task > storage::MemoryStorage::getSortedTasks(const QList< Task > &tasks, Criterion criterion) const
+QList< storage::Task > storage::MemoryStorage::getSortedTasks(const QList< Task > &tasks, Criterion criterion) const noexcept
 {
   QList< Task > result(tasks);
   std::stable_sort(result.begin(), result.end(), TaskSorter(criterion));
