@@ -1,5 +1,10 @@
 #include "memorystorage.hpp"
 #include <algorithm>
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include "serial-utils.hpp"
 
 namespace
 {
@@ -82,13 +87,16 @@ namespace
 
 storage::MemoryStorage::MemoryStorage():
   nextId_(1)
-{}
+{
+  loadFromFile();
+}
 
 void storage::MemoryStorage::addTask(const Task &task)
 {
   Task newTask = task;
   newTask.id = nextId_++;
   tasks_.append(newTask);
+  saveToFile();
 }
 
 void storage::MemoryStorage::removeTask(int id)
@@ -98,6 +106,7 @@ void storage::MemoryStorage::removeTask(int id)
     if (tasks_[i].id == id)
     {
       tasks_.removeAt(i);
+      saveToFile();
       return;
     }
   }
@@ -110,6 +119,7 @@ void storage::MemoryStorage::updateTask(const Task &task)
     if (t.id == task.id)
     {
       t = task;
+      saveToFile();
       return;
     }
   }
@@ -168,8 +178,37 @@ QList< storage::Task > storage::MemoryStorage::getSortedTasks(const QList< Task 
 
 void storage::MemoryStorage::saveToFile() noexcept
 {
+  QJsonArray array;
+  for (const Task &t: tasks_)
+  {
+    array.append(serial::taskToJson(t));
+  }
+
+  QJsonObject root;
+  root["nextId"] = nextId_;
+  root["tasks"] = array;
+
+  const QByteArray data = QJsonDocument(root).toJson(QJsonDocument::Indented);
+  const QString main = serial::filePath(serial::k_fileName);
+  const QString backup = serial::filePath(serial::k_fileNameBackup);
+
+  QFile f(main);
+  if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate))
+  {
+    return;
+  }
+
+  f.write(data);
+  f.close();
+
+  QFile::remove(backup);
+  QFile::copy(main, backup);
 }
 
 void storage::MemoryStorage::loadFromFile() noexcept
 {
+  if (!serial::tryLoad(serial::filePath(serial::k_fileName), tasks_, nextId_))
+  {
+    serial::tryLoad(serial::filePath(serial::k_fileNameBackup), tasks_, nextId_);
+  }
 }
