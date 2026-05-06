@@ -45,5 +45,4 @@ namespace storage
     virtual void loadFromFile(const QString &path) = 0;
   };
 }
-
 #endif
