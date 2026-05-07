@@ -14,7 +14,8 @@ bool controller::Controller::checkReady() const
 
 bool controller::Controller::validateTask(const storage::Task &task) const
 {
-  if (!m_view) {
+  if (!m_view)
+  {
     qCritical() << "Controller::validateTask: m_view is nullptr";
     return false;
   }
@@ -64,7 +65,7 @@ void controller::Controller::refreshView()
 
     case storage::Filter::Priority:
     {
-      assert(!m_filterValue.canConvert< storage::Priority >());
+      assert(m_filterValue.canConvert< storage::Priority >());
       const auto priority = m_filterValue.value< storage::Priority >();
       tasks = m_storage->getTasksFiltered(QString(), false, false, priority);
       break;
