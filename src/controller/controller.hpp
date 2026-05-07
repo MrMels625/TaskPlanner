@@ -13,7 +13,7 @@ namespace controller
     Q_OBJECT
 
   public:
-    explicit Controller(QObject *parent);
+    explicit Controller(QObject *parent = nullptr);
     ~Controller() override = default;
 
     void setStorage(storage::IStorage *storage) override;
@@ -32,8 +32,15 @@ namespace controller
     void onFilterChanged(storage::Filter filter, const QVariant &value) override;
 
   private:
+    bool checkReady() const;
+    bool validateTask(const storage::Task &task) const;
+    void refreshView();
+
     storage::IStorage *m_storage;
     view::IView *m_view;
+    storage::Filter m_activeFilter;
+    QVariant m_filterValue;
+    storage::Criterion m_activeCriterion;
   };
 
 }

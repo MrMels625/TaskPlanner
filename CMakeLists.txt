@@ -30,6 +30,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/storage/task.cpp
         src/controller/controller.hpp
         src/controller/controller.cpp
+        src/controller/controller-nikonov.cpp
+        src/controller/controller-common.cpp
 
     )
 # Define target properties for Android with Qt 6 as:
