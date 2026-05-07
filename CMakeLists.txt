@@ -31,6 +31,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/controller/controller.hpp
         src/controller/controller.cpp
         src/storage/istorage.hpp
+        src/controller/controller-common.cpp
+        src/controller/controller-krylov.cpp
 
     )
 # Define target properties for Android with Qt 6 as:
