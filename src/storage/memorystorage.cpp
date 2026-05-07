@@ -88,7 +88,7 @@ namespace
 storage::MemoryStorage::MemoryStorage():
   nextId_(1)
 {
-  loadFromFile();
+  load();
 }
 
 void storage::MemoryStorage::addTask(const Task &task)
@@ -201,14 +201,24 @@ void storage::MemoryStorage::saveToFile() noexcept
   f.write(data);
   f.close();
 
-  QFile::remove(backup);
-  QFile::copy(main, backup);
+  const QString temp = backup + ".tmp";
+  QFile::remove(temp);
+  if (QFile::copy(main, temp))
+  {
+    QFile::remove(backup);
+    QFile::rename(temp, backup);
+  }
 }
 
-void storage::MemoryStorage::loadFromFile() noexcept
+void storage::MemoryStorage::load() noexcept
 {
   if (!serial::tryLoad(serial::filePath(serial::k_fileName), tasks_, nextId_))
   {
     serial::tryLoad(serial::filePath(serial::k_fileNameBackup), tasks_, nextId_);
   }
+}
+
+void storage::MemoryStorage::loadFromFile() noexcept
+{
+  load();
 }

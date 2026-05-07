@@ -1,4 +1,5 @@
 #include "serial-utils.hpp"
+#include "istorage.hpp"
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
@@ -34,12 +35,38 @@ QJsonObject storage::serial::taskToJson(const Task &task)
 storage::Task storage::serial::taskFromJson(const QJsonObject &obj)
 {
   Task task;
-  task.id = obj["id"].toInt();
-  task.name = obj["name"].toString();
+
+  const int id = obj["id"].toInt();
+  if (id <= 0)
+  {
+    return {};
+  }
+  task.id = id;
+
+  const QString name = obj["name"].toString();
+  if (name.isEmpty())
+  {
+    return {};
+  }
+  task.name = name;
+
   task.description = obj["description"].toString();
-  task.discipline = obj["discipline"].toString();
-  task.deadline = QDateTime::fromString(obj["deadline"].toString(), Qt::ISODate);
-  task.priority = static_cast< Priority >(obj["priority"].toInt());
+  task.discipline  = obj["discipline"].toString();
+
+  const QDateTime deadline = QDateTime::fromString(obj["deadline"].toString(), Qt::ISODate);
+  if (!deadline.isValid())
+  {
+    return {};
+  }
+  task.deadline = deadline;
+
+  const int priorityInt = obj["priority"].toInt(-1);
+  if (priorityInt < static_cast< int >(Priority::All) || priorityInt > static_cast< int >(Priority::Hard))
+  {
+    return {};
+  }
+  task.priority = static_cast< Priority >(priorityInt);
+
   task.completed = obj["completed"].toBool();
 
   for (const QJsonValue &v: obj["tags"].toArray())
@@ -79,7 +106,12 @@ bool storage::serial::tryLoad(const QString &path, QList< Task > &tasks, int &ne
     {
       return false;
     }
-    loaded.append(taskFromJson(v.toObject()));
+    const Task task = taskFromJson(v.toObject());
+    if (task.id <= 0)
+    {
+      return false;
+    }
+    loaded.append(task);
   }
 
   tasks  = loaded;

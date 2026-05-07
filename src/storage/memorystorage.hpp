@@ -27,6 +27,7 @@ namespace storage
 
     void saveToFile() noexcept override;
     void loadFromFile() noexcept override;
+    void load() noexcept;
   };
 }
 
