@@ -12,6 +12,9 @@ namespace controller
     Q_OBJECT
 
   public:
+    explicit IController(QObject *parent = nullptr):
+      QObject(parent)
+    {}
     virtual ~IController() = default;
     virtual void setStorage(storage::IStorage *storage) = 0;
     virtual void setView(view::IView *view) = 0;

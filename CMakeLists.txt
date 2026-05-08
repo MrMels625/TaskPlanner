@@ -30,6 +30,13 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/storage/memorystorage.cpp
         src/view/iview.hpp
         src/controller/icontroller.hpp
+        src/storage/task.cpp
+        src/controller/controller.hpp
+        src/controller/controller.cpp
+        src/storage/istorage.hpp
+        src/controller/controller-common.cpp
+        src/controller/controller-krylov.cpp
+        src/controller/controller-nikonov.cpp
         src/storage/serial-utils.hpp
         src/storage/serial-utils.cpp
     )
