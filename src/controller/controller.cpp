@@ -46,15 +46,3 @@ void controller::Controller::start()
   connect(m_view, &view::IView::sortRequested, this, &Controller::onSortRequested);
   connect(m_view, &view::IView::filterChanged, this, &Controller::onFilterChanged);
 }
-
-void onViewReady()
-{}
-
-void onTaskAddRequested(const storage::Task &task)
-{}
-
-void onTaskDeleteRequested(int taskId)
-{}
-
-void onCompleteRequested(int taskId)
-{}

@@ -33,7 +33,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/storage/istorage.hpp
         src/controller/controller-common.cpp
         src/controller/controller-krylov.cpp
-
+        src/controller/controller-nikonov.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET TaskPlanner APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

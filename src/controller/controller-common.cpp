@@ -43,41 +43,36 @@ void controller::Controller::refreshView()
 
   switch (m_activeFilter)
   {
-  case storage::Filter::ShowAll:
-  {
-    tasks = m_storage->getAllTasks();
-    break;
-  }
+    case storage::Filter::ShowAll:
+      tasks = m_storage->getAllTasks();
+      break;
 
-  case storage::Filter::ShowToday:
-  {
-    tasks = m_storage->getTasksForToday();
-    break;
-  }
+    case storage::Filter::ShowToday:
+      tasks = m_storage->getTasksForToday();
+      break;
 
-  case storage::Filter::ShowOverdue:
-  {
-    tasks = m_storage->getOverdueTasks();
-    break;
-  }
+    case storage::Filter::ShowOverdue:
+      tasks = m_storage->getOverdueTasks();
+      break;
 
-  case storage::Filter::Search:
-  {
-    assert(m_filterValue.canConvert< QString >());
-    const QString text = m_filterValue.toString();
-    tasks = m_storage->getTasksFiltered(text, false, false, storage::Priority::All);
-    break;
-  }
+    case storage::Filter::Search:
+    {
+      assert(m_filterValue.canConvert< QString >());
+      const QString text = m_filterValue.toString();
+      tasks = m_storage->getTasksFiltered(text, false, false, storage::Priority::All);
+      break;
+    }
 
-  case storage::Filter::Priority:
-  {
-    assert(m_filterValue.canConvert< storage::Priority >());
-    const auto priority = m_filterValue.value< storage::Priority >();
-    tasks = m_storage->getTasksFiltered(QString(), false, false, priority);
-    break;
-  }
+    case storage::Filter::Priority:
+    {
+      assert(m_filterValue.canConvert< storage::Priority >());
+      const auto priority = m_filterValue.value< storage::Priority >();
+      tasks = m_storage->getTasksFiltered(QString(), false, false, priority);
+      break;
+    }
   }
 
   tasks = m_storage->getSortedTasks(tasks, m_activeCriterion);
   m_view->showTaskList(tasks);
+}
 }
