@@ -46,18 +46,3 @@ void controller::Controller::start()
   connect(m_view, &view::IView::sortRequested, this, &Controller::onSortRequested);
   connect(m_view, &view::IView::filterChanged, this, &Controller::onFilterChanged);
 }
-
-void controller::Controller::onTaskEditRequested(int taskId)
-{}
-
-void controller::Controller::onTaskUpdateRequested(const storage::Task &task)
-{}
-
-void controller::Controller::onDateSelected(const QDate &date)
-{}
-
-void controller::Controller::onSortRequested(storage::Criterion criterion)
-{}
-
-void controller::Controller::onFilterChanged(storage::Filter filter, const QVariant &value)
-{}

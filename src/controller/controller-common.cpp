@@ -75,3 +75,4 @@ void controller::Controller::refreshView()
   tasks = m_storage->getSortedTasks(tasks, m_activeCriterion);
   m_view->showTaskList(tasks);
 }
+}

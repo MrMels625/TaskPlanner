@@ -20,7 +20,7 @@ namespace controller
     void setView(view::IView *view) override;
     void start() override;
 
-  public slots:
+    public slots:
     void onViewReady() override;
     void onTaskAddRequested(const storage::Task &task) override;
     void onTaskEditRequested(int taskId) override;
