@@ -175,7 +175,7 @@ void controller::Controller::onTaskEditRequested(int taskId)
   {
     if (task.id == taskId)
     {
-      m_view->showTaskCreationForm(task);
+     // m_view->showTaskCreationForm(task);
       return;
     }
   }
