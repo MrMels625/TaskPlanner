@@ -1,8 +1,15 @@
 #include "taskplannerview.hpp"
 
-#include <QDate>
+#include <QCalendarWidget>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDateTimeEdit>
+#include <QLineEdit>
 #include <QListWidgetItem>
+#include <QPushButton>
+#include <QTextEdit>
 #include <QTimer>
+#include <Qt>
 
 view::TaskPlannerView::TaskPlannerView(QWidget *parent):
     QMainWindow(parent),
@@ -89,7 +96,7 @@ void view::TaskPlannerView::onSearchTextChanged(const QString &text)
   emit filterChanged(storage::Filter::Search, QVariant(text));
 }
 
-void view::TaskPlannerView::onFilterStateChanged(int state)
+void view::TaskPlannerView::onFilterStateChanged(Qt::CheckState state)
 {
   Q_UNUSED(state)
   if (ui->checkBoxAll->isChecked())
@@ -179,4 +186,142 @@ void view::TaskPlannerView::onFormSaveClicked()
 void view::TaskPlannerView::onFormCancelClicked()
 {
   closeTaskCreationForm();
+}
+
+void view::TaskPlannerView::setupFilterLogic()
+{
+  ui->comboBoxPriority->clear();
+  ui->comboBoxPriority->addItem("🔴 Высокий");
+  ui->comboBoxPriority->addItem("🟡 Средний");
+  ui->comboBoxPriority->addItem("🟢 Низкий");
+
+  ui->comboBoxFormPriority->clear();
+  ui->comboBoxFormPriority->addItem("🟢 Низкий");
+  ui->comboBoxFormPriority->addItem("🟡 Средний");
+  ui->comboBoxFormPriority->addItem("🔴 Высокий");
+}
+
+storage::Task view::TaskPlannerView::formToTask() const
+{
+  storage::Task task;
+  task.name = ui->lineEditFormName->text();
+  task.description = ui->textEditFormDescription->toPlainText();
+  task.discipline = ui->lineEditFormDiscipline->text();
+  task.deadline = ui->dateTimeFormDeadline->dateTime();
+  task.priority = indexToPriority(ui->comboBoxFormPriority->currentIndex());
+  task.completed = false;
+
+  const QStringList rawTags = ui->lineEditFormTags->text().split(",", Qt::SkipEmptyParts);
+  for (const QString &tag: rawTags)
+  {
+    task.tags.append(tag.trimmed());
+  }
+
+  const QString rawLinks = ui->lineEditFormLinks->text();
+  if (!rawLinks.isEmpty())
+  {
+    const QStringList links = rawLinks.split(",", Qt::SkipEmptyParts);
+    for (const QString &link: links)
+    {
+      task.tags.append("link:" + link.trimmed());
+    }
+  }
+
+  return task;
+}
+
+void view::TaskPlannerView::taskToForm(const storage::Task &task)
+{
+  ui->lineEditFormName->setText(task.name);
+  ui->textEditFormDescription->setPlainText(task.description);
+  ui->lineEditFormDiscipline->setText(task.discipline);
+  ui->dateTimeFormDeadline->setDateTime(task.deadline);
+  ui->comboBoxFormPriority->setCurrentIndex(priorityToIndex(task.priority));
+
+  QString tagsStr;
+  for (const QString &tag: task.tags)
+  {
+    if (!tag.startsWith("link:"))
+    {
+      tagsStr += tag + ", ";
+    }
+  }
+  ui->lineEditFormTags->setText(tagsStr);
+
+  QString linksStr;
+  for (const QString &tag: task.tags)
+  {
+    if (tag.startsWith("link:"))
+    {
+      linksStr += tag.mid(5) + ", ";
+    }
+  }
+  ui->lineEditFormLinks->setText(linksStr);
+}
+
+void view::TaskPlannerView::clearFormFields()
+{
+  ui->lineEditFormName->clear();
+  ui->textEditFormDescription->clear();
+  ui->lineEditFormDiscipline->clear();
+  ui->dateTimeFormDeadline->setDateTime(QDateTime::currentDateTime());
+  ui->comboBoxFormPriority->setCurrentIndex(0);
+  ui->lineEditFormTags->clear();
+  ui->lineEditFormLinks->clear();
+}
+
+storage::Priority view::TaskPlannerView::indexToPriority(int index) const
+{
+  switch (index)
+  {
+  case 0:
+  {
+    return storage::Priority::Low;
+  }
+  case 1:
+  {
+    return storage::Priority::Medium;
+  }
+  case 2:
+  {
+    return storage::Priority::Hard;
+  }
+  default:
+  {
+    return storage::Priority::Low;
+  }
+  }
+}
+
+int view::TaskPlannerView::priorityToIndex(storage::Priority priority) const
+{
+  switch (priority)
+  {
+  case storage::Priority::Low:
+  {
+    return 0;
+  }
+  case storage::Priority::Medium:
+  {
+    return 1;
+  }
+  case storage::Priority::Hard:
+  {
+    return 2;
+  }
+  default:
+  {
+    return 0;
+  }
+  }
+}
+
+int view::TaskPlannerView::getSelectedTaskId() const
+{
+  const QListWidgetItem *item = ui->listWidgetTasks->currentItem();
+  if (!item)
+  {
+    return -1;
+  }
+  return item->data(Qt::UserRole).toInt();
 }

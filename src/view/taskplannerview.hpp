@@ -28,7 +28,7 @@ public:
 private slots:
   void onCalendarClicked(const QDate &date);
   void onSearchTextChanged(const QString &text);
-  void onFilterStateChanged(int state);
+  void onFilterStateChanged(Qt::CheckState state);
   void onPriorityIndexChanged(int index);
   void onAddClicked();
   void onEditClicked();
