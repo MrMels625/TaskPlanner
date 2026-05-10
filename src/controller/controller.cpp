@@ -1,12 +1,14 @@
 #include "controller.hpp"
 #include "../storage/istorage.hpp"
 #include "../view/iview.hpp"
+#include "../view/taskplannerview.hpp"
 
 #include <QDebug>
 #include <QVariant>
 #include <QList>
 #include <QDate>
 #include <cassert>
+#include <QObject>
 
 controller::Controller::Controller(QObject *parent):
   IController(parent),
@@ -43,15 +45,23 @@ void controller::Controller::start()
   {
     return;
   }
-  connect(m_view, &view::IView::viewReady, this, &Controller::onViewReady);
-  connect(m_view, &view::IView::taskAddRequested, this, &Controller::onTaskAddRequested);
-  connect(m_view, &view::IView::taskEditRequested, this, &Controller::onTaskEditRequested);
-  connect(m_view, &view::IView::taskUpdateRequested, this, &Controller::onTaskUpdateRequested);
-  connect(m_view, &view::IView::taskDeleteRequested, this, &Controller::onTaskDeleteRequested);
-  connect(m_view, &view::IView::taskCompleteRequested, this, &Controller::onCompleteRequested);
-  connect(m_view, &view::IView::dateSelected, this, &Controller::onDateSelected);
-  connect(m_view, &view::IView::sortRequested, this, &Controller::onSortRequested);
-  connect(m_view, &view::IView::filterChanged, this, &Controller::onFilterChanged);
+
+  QObject *viewObj = qobject_cast<QObject *>(m_view);
+  if (!viewObj)
+  {
+    qCritical() << "Controller::start: view does not inherit from QObject";
+    return;
+  }
+
+  QObject::connect(viewObj, &view::TaskPlannerView::viewReady, this, &Controller::onViewReady);
+  QObject::connect(viewObj, &view::TaskPlannerView::taskAddRequested, this, &Controller::onTaskAddRequested);
+  QObject::connect(viewObj, &view::TaskPlannerView::taskEditRequested, this, &Controller::onTaskEditRequested);
+  QObject::connect(viewObj, &view::TaskPlannerView::taskUpdateRequested, this, &Controller::onTaskUpdateRequested);
+  QObject::connect(viewObj, &view::TaskPlannerView::taskDeleteRequested, this, &Controller::onTaskDeleteRequested);
+  QObject::connect(viewObj, &view::TaskPlannerView::taskCompleteRequested, this, &Controller::onCompleteRequested);
+  QObject::connect(viewObj, &view::TaskPlannerView::dateSelected, this, &Controller::onDateSelected);
+  QObject::connect(viewObj, &view::TaskPlannerView::sortRequested, this, &Controller::onSortRequested);
+  QObject::connect(viewObj, &view::TaskPlannerView::filterChanged, this, &Controller::onFilterChanged);
 }
 
 bool controller::Controller::checkReady() const
@@ -97,25 +107,21 @@ void controller::Controller::refreshView()
 
   switch (m_activeFilter)
   {
-
   case storage::Filter::ShowAll:
   {
     tasks = m_storage->getAllTasks();
     break;
   }
-
   case storage::Filter::ShowToday:
   {
     tasks = m_storage->getTasksForToday();
     break;
   }
-
   case storage::Filter::ShowOverdue:
   {
     tasks = m_storage->getOverdueTasks();
     break;
   }
-
   case storage::Filter::Search:
   {
     assert(m_filterValue.canConvert< QString >());
@@ -123,7 +129,6 @@ void controller::Controller::refreshView()
     tasks = m_storage->getTasksFiltered(text, false, false, storage::Priority::All);
     break;
   }
-
   case storage::Filter::Priority:
   {
     assert(m_filterValue.canConvert< storage::Priority >());

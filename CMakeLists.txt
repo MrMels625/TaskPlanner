@@ -39,6 +39,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 
         src/storage/serial-utils.hpp
         src/storage/serial-utils.cpp
+        src/view/taskplannerview.hpp
+        src/view/iview.hpp src/view/taskplannerview.cpp src/view/taskplannerview.hpp
     )
 else()
     if(ANDROID)
