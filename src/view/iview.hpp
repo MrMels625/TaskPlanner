@@ -3,7 +3,6 @@
 
 #include <QDate>
 #include <QList>
-#include <QObject>
 #include <QString>
 #include <QVariant>
 
@@ -12,14 +11,9 @@
 
 namespace view
 {
-  class IView: public QObject
+  class IView
   {
-    Q_OBJECT
-
   public:
-    explicit IView(QObject *parent = nullptr):
-      QObject(parent)
-    {}
     virtual ~IView() = default;
 
     virtual void showTaskList(const QList< storage::Task > &tasks) = 0;
@@ -30,17 +24,6 @@ namespace view
     virtual void showErrorMessage(const QString &message) = 0;
     virtual void showInfoMessage(const QString &message) = 0;
     virtual void updateStats(int total, int completed, int today) = 0;
-
-  signals:
-    void viewReady();
-    void taskAddRequested(const storage::Task &task);
-    void taskEditRequested(int taskId);
-    void taskUpdateRequested(const storage::Task &task);
-    void taskDeleteRequested(int taskId);
-    void taskCompleteRequested(int taskId);
-    void dateSelected(const QDate &date);
-    void sortRequested(storage::Criterion criterion);
-    void filterChanged(storage::Filter filter, const QVariant &value);
   };
 }
 
