@@ -13,7 +13,7 @@
 
 view::TaskPlannerView::TaskPlannerView(QWidget *parent):
     QMainWindow(parent),
-    IView(parent),
+    IView(),
     ui(new Ui::TaskPlanner),
     m_currentTaskId(-1),
     m_currentSortCriterion(storage::Criterion::Date)
@@ -22,7 +22,8 @@ view::TaskPlannerView::TaskPlannerView(QWidget *parent):
   connectSignals();
   setupFilterLogic();
   ui->frameTaskForm->setVisible(false);
-  QTimer::singleShot(0, [this]() { emit viewReady(); });
+
+  QTimer::singleShot(0, [this](){ emit viewReady(); });
 }
 
 void view::TaskPlannerView::showTaskList(const QList< storage::Task > &tasks)
@@ -33,10 +34,15 @@ void view::TaskPlannerView::showTaskList(const QList< storage::Task > &tasks)
     QString line = "[" + QString::number(task.id) + "] ";
     line += task.name;
     line += " | " + task.deadline.toString("dd.MM.yyyy HH:mm");
-    line += task.priority != storage::Priority::All ? " | " + QString::number(static_cast<int>(task.priority)) : "";
+
+    if (task.priority != storage::Priority::All)
+    {
+      line += " | Priority: " + QString::number(static_cast<int>(task.priority));
+    }
+
     line += task.completed ? " | ✅" : " | ⬜";
 
-    QListWidgetItem *item = new QListWidgetItem(line, ui->listWidgetTasks);
+    auto *item = new QListWidgetItem(line, ui->listWidgetTasks);
     item->setData(Qt::UserRole, task.id);
   }
 }
@@ -188,12 +194,29 @@ void view::TaskPlannerView::onFormCancelClicked()
   closeTaskCreationForm();
 }
 
+void view::TaskPlannerView::connectSignals()
+{
+  QObject::connect(ui->calendarWidget, &QCalendarWidget::clicked, this, &TaskPlannerView::onCalendarClicked);
+  QObject::connect(ui->lineEditSearch, &QLineEdit::textChanged, this, &TaskPlannerView::onSearchTextChanged);
+  QObject::connect(ui->checkBoxAll, &QCheckBox::checkStateChanged, this, &TaskPlannerView::onFilterStateChanged);
+  QObject::connect(ui->checkBoxToday, &QCheckBox::checkStateChanged, this, &TaskPlannerView::onFilterStateChanged);
+  QObject::connect(ui->checkBoxOverdue, &QCheckBox::checkStateChanged, this, &TaskPlannerView::onFilterStateChanged);
+  QObject::connect(ui->comboBoxPriority, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TaskPlannerView::onPriorityIndexChanged);
+  QObject::connect(ui->btnAdd, &QPushButton::clicked, this, &TaskPlannerView::onAddClicked);
+  QObject::connect(ui->btnEdit, &QPushButton::clicked, this, &TaskPlannerView::onEditClicked);
+  QObject::connect(ui->btnDelete, &QPushButton::clicked, this, &TaskPlannerView::onDeleteClicked);
+  QObject::connect(ui->btnMarkComplete, &QPushButton::clicked, this, &TaskPlannerView::onMarkCompleteClicked);
+  QObject::connect(ui->btnSort, &QPushButton::clicked, this, &TaskPlannerView::onSortClicked);
+  QObject::connect(ui->btnFormSave, &QPushButton::clicked, this, &TaskPlannerView::onFormSaveClicked);
+  QObject::connect(ui->btnFormCancel, &QPushButton::clicked, this, &TaskPlannerView::onFormCancelClicked);
+}
+
 void view::TaskPlannerView::setupFilterLogic()
 {
   ui->comboBoxPriority->clear();
-  ui->comboBoxPriority->addItem("🔴 Высокий");
-  ui->comboBoxPriority->addItem("🟡 Средний");
-  ui->comboBoxPriority->addItem("🟢 Низкий");
+  ui->comboBoxPriority->addItem("🔴 Высокий", static_cast<int>(storage::Priority::Hard));
+  ui->comboBoxPriority->addItem("🟡 Средний", static_cast<int>(storage::Priority::Medium));
+  ui->comboBoxPriority->addItem("🟢 Низкий", static_cast<int>(storage::Priority::Low));
 
   ui->comboBoxFormPriority->clear();
   ui->comboBoxFormPriority->addItem("🟢 Низкий");
@@ -325,3 +348,4 @@ int view::TaskPlannerView::getSelectedTaskId() const
   }
   return item->data(Qt::UserRole).toInt();
 }
+
