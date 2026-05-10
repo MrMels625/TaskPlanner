@@ -8,50 +8,61 @@
 
 namespace view
 {
-class TaskPlannerView: public QMainWindow, public IView
-{
-  Q_OBJECT
+  class TaskPlannerView: public QMainWindow, public IView
+  {
+    Q_OBJECT
 
-public:
-  explicit TaskPlannerView(QWidget *parent = nullptr);
-  ~TaskPlannerView() override = default;
+  public:
+    explicit TaskPlannerView(QWidget *parent = nullptr);
+    ~TaskPlannerView() override = default;
 
-  void showTaskList(const QList< storage::Task > &tasks) override;
-  void showTasksForDate(const QDate &date, const QList< storage::Task > &tasks) override;
-  void showTaskCreationForm() override;
-  void showTaskCreationForm(const storage::Task &task) override;
-  void closeTaskCreationForm() override;
-  void showErrorMessage(const QString &message) override;
-  void showInfoMessage(const QString &message) override;
-  void updateStats(int total, int completed, int today) override;
+    void showTaskList(const QList< storage::Task > &tasks) override;
+    void showTasksForDate(const QDate &date, const QList< storage::Task > &tasks) override;
+    void showTaskCreationForm() override;
+    void showTaskCreationForm(const storage::Task &task) override;
+    void closeTaskCreationForm() override;
+    void showErrorMessage(const QString &message) override;
+    void showInfoMessage(const QString &message) override;
+    void updateStats(int total, int completed, int today) override;
 
-private slots:
-  void onCalendarClicked(const QDate &date);
-  void onSearchTextChanged(const QString &text);
-  void onFilterStateChanged(Qt::CheckState state);
-  void onPriorityIndexChanged(int index);
-  void onAddClicked();
-  void onEditClicked();
-  void onDeleteClicked();
-  void onMarkCompleteClicked();
-  void onSortClicked();
-  void onFormSaveClicked();
-  void onFormCancelClicked();
+  signals:
+    void viewReady();
+    void taskAddRequested(const storage::Task &task);
+    void taskEditRequested(int taskId);
+    void taskUpdateRequested(const storage::Task &task);
+    void taskDeleteRequested(int taskId);
+    void taskCompleteRequested(int taskId);
+    void dateSelected(const QDate &date);
+    void sortRequested(storage::Criterion criterion);
+    void filterChanged(storage::Filter filter, const QVariant &value);
 
-private:
-  void connectSignals();
-  void setupFilterLogic();
-  storage::Task formToTask() const;
-  void taskToForm(const storage::Task &task);
-  void clearFormFields();
-  storage::Priority indexToPriority(int index) const;
-  int priorityToIndex(storage::Priority priority) const;
-  int getSelectedTaskId() const;
+  private slots:
+    void onCalendarClicked(const QDate &date);
+    void onSearchTextChanged(const QString &text);
+    void onFilterStateChanged(Qt::CheckState state);
+    void onPriorityIndexChanged(int index);
+    void onAddClicked();
+    void onEditClicked();
+    void onDeleteClicked();
+    void onMarkCompleteClicked();
+    void onSortClicked();
+    void onFormSaveClicked();
+    void onFormCancelClicked();
 
-  Ui::TaskPlanner *ui;
-  int m_currentTaskId;
-  storage::Criterion m_currentSortCriterion;
-};
+  private:
+    void connectSignals();
+    void setupFilterLogic();
+    storage::Task formToTask() const;
+    void taskToForm(const storage::Task &task);
+    void clearFormFields();
+    storage::Priority indexToPriority(int index) const;
+    int priorityToIndex(storage::Priority priority) const;
+    int getSelectedTaskId() const;
+
+    Ui::TaskPlanner *ui;
+    int m_currentTaskId;
+    storage::Criterion m_currentSortCriterion;
+  };
 }
 
 #endif
