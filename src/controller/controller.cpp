@@ -1,14 +1,14 @@
 #include "controller.hpp"
+
+#include <QDate>
+#include <QList>
+#include <QVariant>
+#include <QDebug>
+#include <cassert>
+
 #include "../storage/istorage.hpp"
 #include "../view/iview.hpp"
 #include "../view/taskplannerview.hpp"
-
-#include <QDebug>
-#include <QVariant>
-#include <QList>
-#include <QDate>
-#include <cassert>
-#include <QObject>
 
 controller::Controller::Controller(QObject *parent):
   IController(parent),
@@ -46,22 +46,22 @@ void controller::Controller::start()
     return;
   }
 
-  QObject *viewObj = qobject_cast<QObject *>(m_view);
-  if (!viewObj)
+  auto *viewPtr = dynamic_cast< view::TaskPlannerView * >(m_view);
+  if (!viewPtr)
   {
-    qCritical() << "Controller::start: view does not inherit from QObject";
+    qCritical() << "Controller::start: view is not a TaskPlannerView instance";
     return;
   }
 
-  QObject::connect(viewObj, &view::TaskPlannerView::viewReady, this, &Controller::onViewReady);
-  QObject::connect(viewObj, &view::TaskPlannerView::taskAddRequested, this, &Controller::onTaskAddRequested);
-  QObject::connect(viewObj, &view::TaskPlannerView::taskEditRequested, this, &Controller::onTaskEditRequested);
-  QObject::connect(viewObj, &view::TaskPlannerView::taskUpdateRequested, this, &Controller::onTaskUpdateRequested);
-  QObject::connect(viewObj, &view::TaskPlannerView::taskDeleteRequested, this, &Controller::onTaskDeleteRequested);
-  QObject::connect(viewObj, &view::TaskPlannerView::taskCompleteRequested, this, &Controller::onCompleteRequested);
-  QObject::connect(viewObj, &view::TaskPlannerView::dateSelected, this, &Controller::onDateSelected);
-  QObject::connect(viewObj, &view::TaskPlannerView::sortRequested, this, &Controller::onSortRequested);
-  QObject::connect(viewObj, &view::TaskPlannerView::filterChanged, this, &Controller::onFilterChanged);
+  QObject::connect(viewPtr, &view::TaskPlannerView::viewReady, this, &Controller::onViewReady);
+  QObject::connect(viewPtr, &view::TaskPlannerView::taskAddRequested, this, &Controller::onTaskAddRequested);
+  QObject::connect(viewPtr, &view::TaskPlannerView::taskEditRequested, this, &Controller::onTaskEditRequested);
+  QObject::connect(viewPtr, &view::TaskPlannerView::taskUpdateRequested, this, &Controller::onTaskUpdateRequested);
+  QObject::connect(viewPtr, &view::TaskPlannerView::taskDeleteRequested, this, &Controller::onTaskDeleteRequested);
+  QObject::connect(viewPtr, &view::TaskPlannerView::taskCompleteRequested, this, &Controller::onCompleteRequested);
+  QObject::connect(viewPtr, &view::TaskPlannerView::dateSelected, this, &Controller::onDateSelected);
+  QObject::connect(viewPtr, &view::TaskPlannerView::sortRequested, this, &Controller::onSortRequested);
+  QObject::connect(viewPtr, &view::TaskPlannerView::filterChanged, this, &Controller::onFilterChanged);
 }
 
 bool controller::Controller::checkReady() const

@@ -14,9 +14,9 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Core)
 
 set(PROJECT_SOURCES
     src/main/main.cpp
-    src/main/taskplanner.cpp
-    src/main/taskplanner.hpp
-    src/main/taskplanner.ui
+
+
+
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -41,6 +41,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         src/storage/serial-utils.cpp
         src/view/taskplannerview.hpp
         src/view/iview.hpp src/view/taskplannerview.cpp src/view/taskplannerview.hpp
+        src/view/taskplanner.ui
     )
 else()
     if(ANDROID)
