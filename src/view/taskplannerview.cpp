@@ -1,4 +1,3 @@
-// taskplannerview.cpp
 #include "taskplannerview.hpp"
 
 #include <QCalendarWidget>
@@ -13,16 +12,20 @@
 #include <Qt>
 
 view::TaskPlannerView::TaskPlannerView(QWidget *parent):
-  QMainWindow(parent),
-  IView(),
-  ui(new Ui::TaskPlanner),
-  m_currentTaskId(-1),
-  m_currentSortCriterion(storage::Criterion::Date)
+    QMainWindow(parent),
+    IView(),
+    ui(new Ui::TaskPlanner),
+    m_currentTaskId(-1),
+    m_currentSortCriterion(storage::Criterion::Date)
 {
   ui->setupUi(this);
   connectSignals();
   setupFilterLogic();
   ui->frameTaskForm->setVisible(false);
+
+  m_statusTimer = new QTimer(this);
+  m_statusTimer->setSingleShot(true);
+  QObject::connect(m_statusTimer, &QTimer::timeout, this, &TaskPlannerView::clearStatusMessage);
 
   QTimer::singleShot(0, [this](){ emit viewReady(); });
 }
@@ -82,12 +85,14 @@ void view::TaskPlannerView::closeTaskCreationForm()
 
 void view::TaskPlannerView::showErrorMessage(const QString &message)
 {
+  m_statusTimer->stop();
   ui->labelStatus->setStyleSheet("color: #e53935; font-weight: bold;");
-  ui->labelStatus->setText("️ " + message);
+  ui->labelStatus->setText("⚠️ " + message);
 }
 
 void view::TaskPlannerView::showInfoMessage(const QString &message)
 {
+  m_statusTimer->start(3000);
   ui->labelStatus->setStyleSheet("color: #43a047; font-weight: bold;");
   ui->labelStatus->setText("ℹ️ " + message);
 }
@@ -97,6 +102,11 @@ void view::TaskPlannerView::updateStats(int total, int completed, int today)
   ui->labelStatsTotal->setText("Всего задач: " + QString::number(total));
   ui->labelStatsCompleted->setText("✅ Выполнено: " + QString::number(completed));
   ui->labelStatsToday->setText("📌 На сегодня: " + QString::number(today));
+}
+
+void view::TaskPlannerView::clearStatusMessage()
+{
+  ui->labelStatus->clear();
 }
 
 void view::TaskPlannerView::onCalendarClicked(const QDate &date)
@@ -114,10 +124,7 @@ void view::TaskPlannerView::onFilterStateChanged(Qt::CheckState state)
   Q_UNUSED(state)
 
   QCheckBox* clickedCheckBox = qobject_cast<QCheckBox*>(sender());
-  if (!clickedCheckBox)
-  {
-    return;
-  }
+  if (!clickedCheckBox) return;
 
   if (clickedCheckBox->isChecked())
   {
@@ -142,7 +149,9 @@ void view::TaskPlannerView::onFilterStateChanged(Qt::CheckState state)
   }
   else
   {
-    if (!ui->checkBoxAll->isChecked() && !ui->checkBoxToday->isChecked() && !ui->checkBoxOverdue->isChecked())
+    if (!ui->checkBoxAll->isChecked() &&
+        !ui->checkBoxToday->isChecked() &&
+        !ui->checkBoxOverdue->isChecked())
     {
       ui->checkBoxAll->setChecked(true);
       emit filterChanged(storage::Filter::ShowAll, QVariant());

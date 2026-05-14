@@ -5,6 +5,7 @@
 #include "ui_taskplanner.h"
 
 #include <QMainWindow>
+#include <QTimer>
 
 namespace view
 {
@@ -48,6 +49,7 @@ namespace view
     void onSortClicked();
     void onFormSaveClicked();
     void onFormCancelClicked();
+    void clearStatusMessage();
 
   private:
     void connectSignals();
@@ -62,6 +64,7 @@ namespace view
     Ui::TaskPlanner *ui;
     int m_currentTaskId;
     storage::Criterion m_currentSortCriterion;
+    QTimer *m_statusTimer;
   };
 }
 
