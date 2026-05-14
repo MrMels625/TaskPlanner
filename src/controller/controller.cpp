@@ -211,7 +211,28 @@ void controller::Controller::onTaskDeleteRequested(int taskId)
     return;
   }
 
+  const QList<storage::Task> all = m_storage->getAllTasks();
+  QString taskName;
+  for (const storage::Task &task: all)
+  {
+    if (task.id == taskId)
+    {
+      taskName = task.name;
+      break;
+    }
+  }
+
   m_storage->removeTask(taskId);
+
+  if (!taskName.isEmpty())
+  {
+    m_view->showInfoMessage("Task \"" + taskName + "\" deleted successfully.");
+  }
+  else
+  {
+    m_view->showInfoMessage("Task deleted successfully.");
+  }
+
   refreshView();
 }
 
