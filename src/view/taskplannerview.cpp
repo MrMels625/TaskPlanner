@@ -33,6 +33,12 @@ void view::TaskPlannerView::showTaskList(const QList< storage::Task > &tasks)
   {
     QString line = "[" + QString::number(task.id) + "] ";
     line += task.name;
+
+    if (!task.discipline.trimmed().isEmpty())
+    {
+      line += " | 📚 " + task.discipline;
+    }
+
     line += " | " + task.deadline.toString("dd.MM.yyyy HH:mm");
 
     if (task.priority != storage::Priority::All)
