@@ -1,4 +1,3 @@
-// taskplannerview.cpp
 #include "taskplannerview.hpp"
 
 #include <QCalendarWidget>
@@ -13,16 +12,21 @@
 #include <Qt>
 
 view::TaskPlannerView::TaskPlannerView(QWidget *parent):
-  QMainWindow(parent),
-  IView(),
-  ui(new Ui::TaskPlanner),
-  m_currentTaskId(-1),
-  m_currentSortCriterion(storage::Criterion::Date)
+    QMainWindow(parent),
+    IView(),
+    ui(new Ui::TaskPlanner),
+    m_currentTaskId(-1),
+    m_currentSortCriterion(storage::Criterion::Date),
+    m_statusTimer(new QTimer(this)),
+    m_isFormReadOnly(false)
 {
   ui->setupUi(this);
   connectSignals();
   setupFilterLogic();
   ui->frameTaskForm->setVisible(false);
+
+  m_statusTimer->setSingleShot(true);
+  QObject::connect(m_statusTimer, &QTimer::timeout, this, &TaskPlannerView::clearStatusMessage);
 
   QTimer::singleShot(0, [this](){ emit viewReady(); });
 }
@@ -63,31 +67,50 @@ void view::TaskPlannerView::showTasksForDate(const QDate &date, const QList< sto
 void view::TaskPlannerView::showTaskCreationForm()
 {
   clearFormFields();
+  setFormReadOnly(false);
   m_currentTaskId = -1;
   ui->frameTaskForm->setVisible(true);
+  ui->btnFormSave->setVisible(true);
+  ui->btnFormCancel->setText("Отмена");
 }
 
 void view::TaskPlannerView::showTaskCreationForm(const storage::Task &task)
 {
   taskToForm(task);
+  setFormReadOnly(false);
   m_currentTaskId = task.id;
   ui->frameTaskForm->setVisible(true);
+  ui->btnFormSave->setVisible(true);
+  ui->btnFormCancel->setText("Отмена");
+}
+
+void view::TaskPlannerView::showTaskDetails(const storage::Task &task)
+{
+  taskToForm(task);
+  setFormReadOnly(true);
+  m_currentTaskId = task.id;
+  ui->frameTaskForm->setVisible(true);
+  ui->btnFormSave->setVisible(false);
+  ui->btnFormCancel->setText("Закрыть");
 }
 
 void view::TaskPlannerView::closeTaskCreationForm()
 {
   ui->frameTaskForm->setVisible(false);
   clearFormFields();
+  setFormReadOnly(false);
 }
 
 void view::TaskPlannerView::showErrorMessage(const QString &message)
 {
+  m_statusTimer->stop();
   ui->labelStatus->setStyleSheet("color: #e53935; font-weight: bold;");
-  ui->labelStatus->setText("️ " + message);
+  ui->labelStatus->setText("⚠️ " + message);
 }
 
 void view::TaskPlannerView::showInfoMessage(const QString &message)
 {
+  m_statusTimer->start(3000);
   ui->labelStatus->setStyleSheet("color: #43a047; font-weight: bold;");
   ui->labelStatus->setText("ℹ️ " + message);
 }
@@ -97,6 +120,11 @@ void view::TaskPlannerView::updateStats(int total, int completed, int today)
   ui->labelStatsTotal->setText("Всего задач: " + QString::number(total));
   ui->labelStatsCompleted->setText("✅ Выполнено: " + QString::number(completed));
   ui->labelStatsToday->setText("📌 На сегодня: " + QString::number(today));
+}
+
+void view::TaskPlannerView::clearStatusMessage()
+{
+  ui->labelStatus->clear();
 }
 
 void view::TaskPlannerView::onCalendarClicked(const QDate &date)
@@ -113,7 +141,7 @@ void view::TaskPlannerView::onFilterStateChanged(Qt::CheckState state)
 {
   Q_UNUSED(state)
 
-  QCheckBox* clickedCheckBox = qobject_cast<QCheckBox*>(sender());
+  QCheckBox *clickedCheckBox = qobject_cast< QCheckBox* >(sender());
   if (!clickedCheckBox)
   {
     return;
@@ -232,7 +260,7 @@ void view::TaskPlannerView::connectSignals()
   QObject::connect(ui->checkBoxAll, &QCheckBox::checkStateChanged, this, &TaskPlannerView::onFilterStateChanged);
   QObject::connect(ui->checkBoxToday, &QCheckBox::checkStateChanged, this, &TaskPlannerView::onFilterStateChanged);
   QObject::connect(ui->checkBoxOverdue, &QCheckBox::checkStateChanged, this, &TaskPlannerView::onFilterStateChanged);
-  QObject::connect(ui->comboBoxPriority, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TaskPlannerView::onPriorityIndexChanged);
+  QObject::connect(ui->comboBoxPriority, QOverload< int >::of(&QComboBox::currentIndexChanged), this, &TaskPlannerView::onPriorityIndexChanged);
   QObject::connect(ui->btnAdd, &QPushButton::clicked, this, &TaskPlannerView::onAddClicked);
   QObject::connect(ui->btnEdit, &QPushButton::clicked, this, &TaskPlannerView::onEditClicked);
   QObject::connect(ui->btnDelete, &QPushButton::clicked, this, &TaskPlannerView::onDeleteClicked);
@@ -240,19 +268,28 @@ void view::TaskPlannerView::connectSignals()
   QObject::connect(ui->btnSort, &QPushButton::clicked, this, &TaskPlannerView::onSortClicked);
   QObject::connect(ui->btnFormSave, &QPushButton::clicked, this, &TaskPlannerView::onFormSaveClicked);
   QObject::connect(ui->btnFormCancel, &QPushButton::clicked, this, &TaskPlannerView::onFormCancelClicked);
+
+  QObject::connect(ui->listWidgetTasks, &QListWidget::itemDoubleClicked, this,
+                   [this](QListWidgetItem *item){
+                     if (item)
+                     {
+                       const int taskId = item->data(Qt::UserRole).toInt();
+                       emit taskViewRequested(taskId);
+                     }
+                   });
 }
 
 void view::TaskPlannerView::setupFilterLogic()
 {
   ui->comboBoxPriority->clear();
-  ui->comboBoxPriority->addItem("🟢 Низкий", static_cast<int>(storage::Priority::Low));
-  ui->comboBoxPriority->addItem("🟡 Средний", static_cast<int>(storage::Priority::Medium));
-  ui->comboBoxPriority->addItem("🔴 Высокий", static_cast<int>(storage::Priority::Hard));
+  ui->comboBoxPriority->addItem("🟢 Низкий", static_cast< int >(storage::Priority::Low));
+  ui->comboBoxPriority->addItem("🟡 Средний", static_cast< int >(storage::Priority::Medium));
+  ui->comboBoxPriority->addItem("🔴 Высокий", static_cast< int >(storage::Priority::Hard));
 
   ui->comboBoxFormPriority->clear();
   ui->comboBoxFormPriority->addItem("🟢 Низкий");
   ui->comboBoxFormPriority->addItem("🟡 Средний");
-  ui->comboBoxFormPriority->addItem(" Высокий");
+  ui->comboBoxFormPriority->addItem("🔴 Высокий");
 }
 
 storage::Task view::TaskPlannerView::formToTask() const
@@ -322,6 +359,18 @@ void view::TaskPlannerView::clearFormFields()
   ui->comboBoxFormPriority->setCurrentIndex(0);
   ui->lineEditFormTags->clear();
   ui->lineEditFormLinks->clear();
+}
+
+void view::TaskPlannerView::setFormReadOnly(bool readOnly)
+{
+  m_isFormReadOnly = readOnly;
+  ui->lineEditFormName->setReadOnly(readOnly);
+  ui->lineEditFormDiscipline->setReadOnly(readOnly);
+  ui->textEditFormDescription->setReadOnly(readOnly);
+  ui->lineEditFormTags->setReadOnly(readOnly);
+  ui->lineEditFormLinks->setReadOnly(readOnly);
+  ui->dateTimeFormDeadline->setReadOnly(readOnly);
+  ui->comboBoxFormPriority->setEnabled(!readOnly);
 }
 
 storage::Priority view::TaskPlannerView::indexToPriority(int index) const

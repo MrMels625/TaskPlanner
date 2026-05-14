@@ -1,10 +1,11 @@
 #include "controller.hpp"
 
+#include <cassert>
+#include <algorithm>
 #include <QDate>
 #include <QList>
 #include <QVariant>
 #include <QDebug>
-#include <cassert>
 
 #include "../storage/istorage.hpp"
 #include "../view/iview.hpp"
@@ -46,22 +47,23 @@ void controller::Controller::start()
     return;
   }
 
-  auto *viewPtr = dynamic_cast< view::TaskPlannerView * >(m_view);
-  if (!viewPtr)
+  auto *view_ptr = dynamic_cast< view::TaskPlannerView* >(m_view);
+  if (!view_ptr)
   {
     qCritical() << "Controller::start: view is not a TaskPlannerView instance";
     return;
   }
 
-  QObject::connect(viewPtr, &view::TaskPlannerView::viewReady, this, &Controller::onViewReady);
-  QObject::connect(viewPtr, &view::TaskPlannerView::taskAddRequested, this, &Controller::onTaskAddRequested);
-  QObject::connect(viewPtr, &view::TaskPlannerView::taskEditRequested, this, &Controller::onTaskEditRequested);
-  QObject::connect(viewPtr, &view::TaskPlannerView::taskUpdateRequested, this, &Controller::onTaskUpdateRequested);
-  QObject::connect(viewPtr, &view::TaskPlannerView::taskDeleteRequested, this, &Controller::onTaskDeleteRequested);
-  QObject::connect(viewPtr, &view::TaskPlannerView::taskCompleteRequested, this, &Controller::onCompleteRequested);
-  QObject::connect(viewPtr, &view::TaskPlannerView::dateSelected, this, &Controller::onDateSelected);
-  QObject::connect(viewPtr, &view::TaskPlannerView::sortRequested, this, &Controller::onSortRequested);
-  QObject::connect(viewPtr, &view::TaskPlannerView::filterChanged, this, &Controller::onFilterChanged);
+  QObject::connect(view_ptr, &view::TaskPlannerView::viewReady, this, &controller::Controller::onViewReady);
+  QObject::connect(view_ptr, &view::TaskPlannerView::taskAddRequested, this, &controller::Controller::onTaskAddRequested);
+  QObject::connect(view_ptr, &view::TaskPlannerView::taskEditRequested, this, &controller::Controller::onTaskEditRequested);
+  QObject::connect(view_ptr, &view::TaskPlannerView::taskViewRequested, this, &controller::Controller::onTaskViewRequested);
+  QObject::connect(view_ptr, &view::TaskPlannerView::taskUpdateRequested, this, &controller::Controller::onTaskUpdateRequested);
+  QObject::connect(view_ptr, &view::TaskPlannerView::taskDeleteRequested, this, &controller::Controller::onTaskDeleteRequested);
+  QObject::connect(view_ptr, &view::TaskPlannerView::taskCompleteRequested, this, &controller::Controller::onCompleteRequested);
+  QObject::connect(view_ptr, &view::TaskPlannerView::dateSelected, this, &controller::Controller::onDateSelected);
+  QObject::connect(view_ptr, &view::TaskPlannerView::sortRequested, this, &controller::Controller::onSortRequested);
+  QObject::connect(view_ptr, &view::TaskPlannerView::filterChanged, this, &controller::Controller::onFilterChanged);
 }
 
 bool controller::Controller::checkReady() const
@@ -140,6 +142,22 @@ void controller::Controller::refreshView()
 
   tasks = m_storage->getSortedTasks(tasks, m_activeCriterion);
   m_view->showTaskList(tasks);
+  updateStats();
+}
+
+void controller::Controller::updateStats()
+{
+  if (!checkReady())
+  {
+    return;
+  }
+
+  const QList< storage::Task > all_tasks = m_storage->getAllTasks();
+  const int completed_count = std::count_if(all_tasks.begin(), all_tasks.end(),
+                                            [](const storage::Task &task){ return task.completed; });
+  const int today_count = m_storage->getTasksForToday().size();
+
+  m_view->updateStats(all_tasks.size(), completed_count, today_count);
 }
 
 void controller::Controller::onViewReady()
@@ -163,29 +181,54 @@ void controller::Controller::onTaskAddRequested(const storage::Task &task)
   }
 
   m_storage->addTask(task);
-  m_view->showInfoMessage("Task «" + task.name + "» added successfully.");
+  m_view->showInfoMessage("Task \"" + task.name + "\" added successfully.");
   refreshView();
 }
 
-void controller::Controller::onTaskEditRequested(int taskId)
+void controller::Controller::onTaskEditRequested(int task_id)
 {
   if (!checkReady())
   {
     return;
   }
 
-  const QList< storage::Task > all = m_storage->getAllTasks();
+  const QList< storage::Task > all_tasks = m_storage->getAllTasks();
 
-  for (const storage::Task &task: all)
+  for (const storage::Task &task: all_tasks)
   {
-    if (task.id == taskId)
+    if (task.id == task_id)
     {
       m_view->showTaskCreationForm(task);
       return;
     }
   }
 
-  m_view->showErrorMessage("Task with ID " + QString::number(taskId) + " not found.");
+  m_view->showErrorMessage("Task with ID " + QString::number(task_id) + " not found.");
+}
+
+void controller::Controller::onTaskViewRequested(int task_id)
+{
+  if (!checkReady())
+  {
+    return;
+  }
+
+  const QList< storage::Task > all_tasks = m_storage->getAllTasks();
+
+  for (const storage::Task &task: all_tasks)
+  {
+    if (task.id == task_id)
+    {
+      auto *view_ptr = dynamic_cast< view::TaskPlannerView* >(m_view);
+      if (view_ptr)
+      {
+        view_ptr->showTaskDetails(task);
+      }
+      return;
+    }
+  }
+
+  m_view->showErrorMessage("Task with ID " + QString::number(task_id) + " not found.");
 }
 
 void controller::Controller::onTaskUpdateRequested(const storage::Task &task)
@@ -200,42 +243,67 @@ void controller::Controller::onTaskUpdateRequested(const storage::Task &task)
   }
 
   m_storage->updateTask(task);
-  m_view->showInfoMessage("Task «" + task.name + "» successfully updated.");
+  m_view->showInfoMessage("Task \"" + task.name + "\" successfully updated.");
   refreshView();
 }
 
-void controller::Controller::onTaskDeleteRequested(int taskId)
+void controller::Controller::onTaskDeleteRequested(int task_id)
 {
   if (!checkReady())
   {
     return;
   }
 
-  m_storage->removeTask(taskId);
+  const QList< storage::Task > all_tasks = m_storage->getAllTasks();
+  QString task_name;
+
+  for (const storage::Task &task: all_tasks)
+  {
+    if (task.id == task_id)
+    {
+      task_name = task.name;
+      break;
+    }
+  }
+
+  m_storage->removeTask(task_id);
+
+  if (!task_name.isEmpty())
+  {
+    m_view->showInfoMessage("Task \"" + task_name + "\" deleted successfully.");
+  }
+  else
+  {
+    m_view->showInfoMessage("Task deleted successfully.");
+  }
+
   refreshView();
 }
 
-void controller::Controller::onCompleteRequested(int taskId)
+void controller::Controller::onCompleteRequested(int task_id)
 {
   if (!checkReady())
   {
     return;
   }
 
-  QList< storage::Task > all = m_storage->getAllTasks();
+  QList< storage::Task > all_tasks = m_storage->getAllTasks();
 
-  for (storage::Task &task: all)
+  for (storage::Task &task: all_tasks)
   {
-    if (task.id == taskId)
+    if (task.id == task_id)
     {
       task.completed = !task.completed;
       m_storage->updateTask(task);
+      const QString message = task.completed ? "Task \"" + task.name + "\" marked as completed." :
+        "Task \"" + task.name + "\" marked as not completed.";
+      m_view->showInfoMessage(message);
       refreshView();
       return;
     }
   }
 
-  m_view->showErrorMessage("The issue with the ID " + QString::number(taskId) + " was not found.");
+  m_view->showErrorMessage("Task with ID " + QString::number(task_id) + " not found.");
 }
 
 void controller::Controller::onDateSelected(const QDate &date)
