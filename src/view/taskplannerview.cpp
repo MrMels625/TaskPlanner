@@ -1,3 +1,4 @@
+// taskplannerview.cpp
 #include "taskplannerview.hpp"
 
 #include <QCalendarWidget>
@@ -12,11 +13,11 @@
 #include <Qt>
 
 view::TaskPlannerView::TaskPlannerView(QWidget *parent):
-    QMainWindow(parent),
-    IView(),
-    ui(new Ui::TaskPlanner),
-    m_currentTaskId(-1),
-    m_currentSortCriterion(storage::Criterion::Date)
+  QMainWindow(parent),
+  IView(),
+  ui(new Ui::TaskPlanner),
+  m_currentTaskId(-1),
+  m_currentSortCriterion(storage::Criterion::Date)
 {
   ui->setupUi(this);
   connectSignals();
@@ -33,6 +34,12 @@ void view::TaskPlannerView::showTaskList(const QList< storage::Task > &tasks)
   {
     QString line = "[" + QString::number(task.id) + "] ";
     line += task.name;
+
+    if (!task.discipline.trimmed().isEmpty())
+    {
+      line += " | 📚 " + task.discipline;
+    }
+
     line += " | " + task.deadline.toString("dd.MM.yyyy HH:mm");
 
     if (task.priority != storage::Priority::All)
@@ -76,7 +83,7 @@ void view::TaskPlannerView::closeTaskCreationForm()
 void view::TaskPlannerView::showErrorMessage(const QString &message)
 {
   ui->labelStatus->setStyleSheet("color: #e53935; font-weight: bold;");
-  ui->labelStatus->setText("⚠️ " + message);
+  ui->labelStatus->setText("️ " + message);
 }
 
 void view::TaskPlannerView::showInfoMessage(const QString &message)
@@ -105,17 +112,41 @@ void view::TaskPlannerView::onSearchTextChanged(const QString &text)
 void view::TaskPlannerView::onFilterStateChanged(Qt::CheckState state)
 {
   Q_UNUSED(state)
-  if (ui->checkBoxAll->isChecked())
+
+  QCheckBox* clickedCheckBox = qobject_cast<QCheckBox*>(sender());
+  if (!clickedCheckBox)
   {
-    emit filterChanged(storage::Filter::ShowAll, QVariant());
+    return;
   }
-  else if (ui->checkBoxToday->isChecked())
+
+  if (clickedCheckBox->isChecked())
   {
-    emit filterChanged(storage::Filter::ShowToday, QVariant());
+    if (clickedCheckBox == ui->checkBoxAll)
+    {
+      ui->checkBoxToday->setChecked(false);
+      ui->checkBoxOverdue->setChecked(false);
+      emit filterChanged(storage::Filter::ShowAll, QVariant());
+    }
+    else if (clickedCheckBox == ui->checkBoxToday)
+    {
+      ui->checkBoxAll->setChecked(false);
+      ui->checkBoxOverdue->setChecked(false);
+      emit filterChanged(storage::Filter::ShowToday, QVariant());
+    }
+    else if (clickedCheckBox == ui->checkBoxOverdue)
+    {
+      ui->checkBoxAll->setChecked(false);
+      ui->checkBoxToday->setChecked(false);
+      emit filterChanged(storage::Filter::ShowOverdue, QVariant());
+    }
   }
-  else if (ui->checkBoxOverdue->isChecked())
+  else
   {
-    emit filterChanged(storage::Filter::ShowOverdue, QVariant());
+    if (!ui->checkBoxAll->isChecked() && !ui->checkBoxToday->isChecked() && !ui->checkBoxOverdue->isChecked())
+    {
+      ui->checkBoxAll->setChecked(true);
+      emit filterChanged(storage::Filter::ShowAll, QVariant());
+    }
   }
 }
 
@@ -214,14 +245,14 @@ void view::TaskPlannerView::connectSignals()
 void view::TaskPlannerView::setupFilterLogic()
 {
   ui->comboBoxPriority->clear();
-  ui->comboBoxPriority->addItem("🔴 Высокий", static_cast<int>(storage::Priority::Hard));
-  ui->comboBoxPriority->addItem("🟡 Средний", static_cast<int>(storage::Priority::Medium));
   ui->comboBoxPriority->addItem("🟢 Низкий", static_cast<int>(storage::Priority::Low));
+  ui->comboBoxPriority->addItem("🟡 Средний", static_cast<int>(storage::Priority::Medium));
+  ui->comboBoxPriority->addItem("🔴 Высокий", static_cast<int>(storage::Priority::Hard));
 
   ui->comboBoxFormPriority->clear();
   ui->comboBoxFormPriority->addItem("🟢 Низкий");
   ui->comboBoxFormPriority->addItem("🟡 Средний");
-  ui->comboBoxFormPriority->addItem("🔴 Высокий");
+  ui->comboBoxFormPriority->addItem(" Высокий");
 }
 
 storage::Task view::TaskPlannerView::formToTask() const
@@ -348,4 +379,3 @@ int view::TaskPlannerView::getSelectedTaskId() const
   }
   return item->data(Qt::UserRole).toInt();
 }
-
