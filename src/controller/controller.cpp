@@ -140,6 +140,12 @@ void controller::Controller::refreshView()
 
   tasks = m_storage->getSortedTasks(tasks, m_activeCriterion);
   m_view->showTaskList(tasks);
+
+  const QList< storage::Task > allTasks = m_storage->getAllTasks();
+  int completedCount = std::count_if(allTasks.begin(), allTasks.end(), [](const storage::Task &t) { return t.completed; });
+  int todayCount = m_storage->getTasksForToday().size();
+
+  m_view->updateStats(allTasks.size(), completedCount, todayCount);
 }
 
 void controller::Controller::onViewReady()
