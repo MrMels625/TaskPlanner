@@ -15,9 +15,11 @@ controller::Controller::Controller(QObject *parent):
   IController(parent),
   m_storage(nullptr),
   m_view(nullptr),
-  m_activeFilter(storage::Filter::ShowAll),
-  m_filterValue(QVariant()),
-  m_activeCriterion(storage::Criterion::Date)
+  m_scopeFilter(storage::Filter::ShowAll),
+  m_priorityFilter(storage::Priority::All),
+  m_activeCriterion(storage::Criterion::Date),
+  m_dateSelected(false),
+  m_selectedDate(QDate())
 {}
 
 void controller::Controller::setStorage(storage::IStorage *storage)
@@ -107,37 +109,69 @@ void controller::Controller::refreshView()
 
   QList< storage::Task > tasks;
 
-  switch (m_activeFilter)
+  if (m_dateSelected)
   {
-  case storage::Filter::ShowAll:
-  {
-    tasks = m_storage->getAllTasks();
-    break;
+    tasks = m_storage->getTasksForDate(m_selectedDate);
   }
-  case storage::Filter::ShowToday:
+  else
   {
-    tasks = m_storage->getTasksForToday();
-    break;
+    switch (m_scopeFilter)
+    {
+      case storage::Filter::ShowAll:
+      {
+        tasks = m_storage->getAllTasks();
+        break;
+      }
+      case storage::Filter::ShowToday:
+      {
+        tasks = m_storage->getTasksForToday();
+        break;
+      }
+      case storage::Filter::ShowOverdue:
+      {
+        tasks = m_storage->getOverdueTasks();
+        break;
+      }
+      default:
+      {
+        tasks = m_storage->getAllTasks();
+        break;
+      }
+    }
   }
-  case storage::Filter::ShowOverdue:
+
+  if (m_priorityFilter != storage::Priority::All)
   {
-    tasks = m_storage->getOverdueTasks();
-    break;
+    tasks.erase(
+      std::remove_if(tasks.begin(), tasks.end(),
+                     [this](const storage::Task &task)
+                     {
+                       return task.priority != static_cast< storage::Priority >(m_priorityFilter);
+                     }),
+      tasks.end());
   }
-  case storage::Filter::Search:
+
+  if (m_dateSelected)
   {
-    assert(m_filterValue.canConvert< QString >());
-    const QString text = m_filterValue.toString();
-    tasks = m_storage->getTasksFiltered(text, false, false, storage::Priority::All);
-    break;
+    m_view->setTaskListTitle("Задачи на " + m_selectedDate.toString("dd.MM.yyyy"));
   }
-  case storage::Filter::Priority:
+  else
   {
-    assert(m_filterValue.canConvert< storage::Priority >());
-    const auto priority = m_filterValue.value< storage::Priority >();
-    tasks = m_storage->getTasksFiltered(QString(), false, false, priority);
-    break;
-  }
+    switch (m_scopeFilter)
+    {
+    case storage::Filter::ShowAll:
+      m_view->setTaskListTitle("Все задачи");
+      break;
+    case storage::Filter::ShowToday:
+      m_view->setTaskListTitle("Задачи на " + QDate::currentDate().toString("dd.MM.yyyy"));
+      break;
+    case storage::Filter::ShowOverdue:
+      m_view->setTaskListTitle("Просроченные задачи");
+      break;
+    default:
+      m_view->setTaskListTitle("Список задач");
+      break;
+    }
   }
 
   tasks = m_storage->getSortedTasks(tasks, m_activeCriterion);
@@ -296,7 +330,7 @@ void controller::Controller::onCompleteRequested(int task_id)
       task.completed = !task.completed;
       m_storage->updateTask(task);
       const QString message = task.completed ? "Task \"" + task.name + "\" marked as completed." :
-        "Task \"" + task.name + "\" marked as not completed.";
+                                "Task \"" + task.name + "\" marked as not completed.";
       m_view->showInfoMessage(message);
       refreshView();
       return;
@@ -313,8 +347,18 @@ void controller::Controller::onDateSelected(const QDate &date)
     return;
   }
 
-  const QList< storage::Task > tasks = m_storage->getTasksForDate(date);
-  m_view->showTasksForDate(date, tasks);
+  if (m_dateSelected && m_selectedDate == date)
+  {
+    m_dateSelected = false;
+    m_selectedDate = QDate();
+  }
+  else
+  {
+    m_dateSelected = true;
+    m_selectedDate = date;
+  }
+
+  refreshView();
 }
 
 void controller::Controller::onSortRequested(storage::Criterion criterion)
@@ -335,7 +379,31 @@ void controller::Controller::onFilterChanged(storage::Filter filter, const QVari
     return;
   }
 
-  m_activeFilter = filter;
-  m_filterValue = value;
+  if (filter == storage::Filter::Priority)
+  {
+    assert(value.canConvert< storage::Priority >());
+    m_priorityFilter = value.value< storage::Priority >();
+  }
+  else if (filter == storage::Filter::Search)
+  {
+    m_dateSelected = false;
+    m_selectedDate = QDate();
+    m_scopeFilter = storage::Filter::ShowAll;
+    assert(value.canConvert< QString  >());
+    const QString text = value.toString();
+    QList< storage::Task > tasks = m_storage->getTasksFiltered(
+      text, false, false, m_priorityFilter);
+    tasks = m_storage->getSortedTasks(tasks, m_activeCriterion);
+    m_view->showTaskList(tasks);
+    updateStats();
+    return;
+  }
+  else
+  {
+    m_scopeFilter = filter;
+    m_dateSelected = false;
+    m_selectedDate = QDate();
+  }
+
   refreshView();
 }
