@@ -11,6 +11,7 @@
 
 namespace view
 {
+
   class IView
   {
   public:
@@ -18,6 +19,7 @@ namespace view
 
     virtual void showTaskList(const QList< storage::Task > &tasks) = 0;
     virtual void showTasksForDate(const QDate &date, const QList< storage::Task > &tasks) = 0;
+    virtual void setTaskListTitle(const QString &title) = 0;
     virtual void showTaskCreationForm() = 0;
     virtual void showTaskCreationForm(const storage::Task &task) = 0;
     virtual void closeTaskCreationForm() = 0;
@@ -25,6 +27,7 @@ namespace view
     virtual void showInfoMessage(const QString &message) = 0;
     virtual void updateStats(int total, int completed, int today) = 0;
   };
+
 }
 
 #endif
