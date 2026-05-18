@@ -26,7 +26,8 @@ view::TaskPlannerView::TaskPlannerView(QWidget *parent):
   ui->frameTaskForm->setVisible(false);
 
   m_statusTimer->setSingleShot(true);
-  QObject::connect(m_statusTimer, &QTimer::timeout, this, &TaskPlannerView::clearStatusMessage);
+  QObject::connect(m_statusTimer, &QTimer::timeout, this,
+                   &TaskPlannerView::clearStatusMessage);
 
   QTimer::singleShot(0, [this](){ emit viewReady(); });
 }
@@ -48,7 +49,7 @@ void view::TaskPlannerView::showTaskList(const QList< storage::Task > &tasks)
 
     if (task.priority != storage::Priority::All)
     {
-      line += " | Priority: " + QString::number(static_cast<int>(task.priority));
+      line += " | Priority: " + QString::number(static_cast< int >(task.priority));
     }
 
     line += task.completed ? " | ✅" : " | ⬜";
@@ -62,6 +63,11 @@ void view::TaskPlannerView::showTasksForDate(const QDate &date, const QList< sto
 {
   ui->labelTaskListTitle->setText("📋 ЗАДАЧИ НА " + date.toString("dd.MM.yyyy"));
   showTaskList(tasks);
+}
+
+void view::TaskPlannerView::setTaskListTitle(const QString &title)
+{
+  ui->labelTaskListTitle->setText(title);
 }
 
 void view::TaskPlannerView::showTaskCreationForm()
@@ -141,7 +147,7 @@ void view::TaskPlannerView::onFilterStateChanged(Qt::CheckState state)
 {
   Q_UNUSED(state)
 
-  QCheckBox *clickedCheckBox = qobject_cast< QCheckBox* >(sender());
+  QCheckBox *clickedCheckBox = qobject_cast< QCheckBox * >(sender());
   if (!clickedCheckBox)
   {
     return;
@@ -170,7 +176,9 @@ void view::TaskPlannerView::onFilterStateChanged(Qt::CheckState state)
   }
   else
   {
-    if (!ui->checkBoxAll->isChecked() && !ui->checkBoxToday->isChecked() && !ui->checkBoxOverdue->isChecked())
+    if (!ui->checkBoxAll->isChecked() &&
+        !ui->checkBoxToday->isChecked() &&
+        !ui->checkBoxOverdue->isChecked())
     {
       ui->checkBoxAll->setChecked(true);
       emit filterChanged(storage::Filter::ShowAll, QVariant());
@@ -282,6 +290,7 @@ void view::TaskPlannerView::connectSignals()
 void view::TaskPlannerView::setupFilterLogic()
 {
   ui->comboBoxPriority->clear();
+  ui->comboBoxPriority->addItem("Приоритет: Все", static_cast< int >(storage::Priority::All));
   ui->comboBoxPriority->addItem("🟢 Низкий", static_cast< int >(storage::Priority::Low));
   ui->comboBoxPriority->addItem("🟡 Средний", static_cast< int >(storage::Priority::Medium));
   ui->comboBoxPriority->addItem("🔴 Высокий", static_cast< int >(storage::Priority::Hard));
@@ -379,19 +388,23 @@ storage::Priority view::TaskPlannerView::indexToPriority(int index) const
   {
   case 0:
   {
-    return storage::Priority::Low;
+    return storage::Priority::All;
   }
   case 1:
   {
-    return storage::Priority::Medium;
+    return storage::Priority::Low;
   }
   case 2:
+  {
+    return storage::Priority::Medium;
+  }
+  case 3:
   {
     return storage::Priority::Hard;
   }
   default:
   {
-    return storage::Priority::Low;
+    return storage::Priority::All;
   }
   }
 }
@@ -400,17 +413,21 @@ int view::TaskPlannerView::priorityToIndex(storage::Priority priority) const
 {
   switch (priority)
   {
-  case storage::Priority::Low:
+  case storage::Priority::All:
   {
     return 0;
   }
-  case storage::Priority::Medium:
+  case storage::Priority::Low:
   {
     return 1;
   }
-  case storage::Priority::Hard:
+  case storage::Priority::Medium:
   {
     return 2;
+  }
+  case storage::Priority::Hard:
+  {
+    return 3;
   }
   default:
   {
