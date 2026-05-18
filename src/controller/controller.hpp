@@ -40,9 +40,11 @@ private:
 
   storage::IStorage *m_storage;
   view::IView *m_view;
-  storage::Filter m_activeFilter;
-  QVariant m_filterValue;
+  storage::Filter m_scopeFilter;
+  storage::Priority m_priorityFilter;
   storage::Criterion m_activeCriterion;
+  bool m_dateSelected;
+  QDate m_selectedDate;
 };
 
 }
