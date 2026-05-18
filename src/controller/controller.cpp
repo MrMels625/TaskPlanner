@@ -117,26 +117,26 @@ void controller::Controller::refreshView()
   {
     switch (m_scopeFilter)
     {
-    case storage::Filter::ShowAll:
-    {
-      tasks = m_storage->getAllTasks();
-      break;
-    }
-    case storage::Filter::ShowToday:
-    {
-      tasks = m_storage->getTasksForToday();
-      break;
-    }
-    case storage::Filter::ShowOverdue:
-    {
-      tasks = m_storage->getOverdueTasks();
-      break;
-    }
-    default:
-    {
-      tasks = m_storage->getAllTasks();
-      break;
-    }
+      case storage::Filter::ShowAll:
+      {
+        tasks = m_storage->getAllTasks();
+        break;
+      }
+      case storage::Filter::ShowToday:
+      {
+        tasks = m_storage->getTasksForToday();
+        break;
+      }
+      case storage::Filter::ShowOverdue:
+      {
+        tasks = m_storage->getOverdueTasks();
+        break;
+      }
+      default:
+      {
+        tasks = m_storage->getAllTasks();
+        break;
+      }
     }
   }
 
@@ -149,6 +149,29 @@ void controller::Controller::refreshView()
                        return task.priority != static_cast< storage::Priority >(m_priorityFilter);
                      }),
       tasks.end());
+  }
+
+  if (m_dateSelected)
+  {
+    m_view->setTaskListTitle("Задачи на " + m_selectedDate.toString("dd.MM.yyyy"));
+  }
+  else
+  {
+    switch (m_scopeFilter)
+    {
+    case storage::Filter::ShowAll:
+      m_view->setTaskListTitle("Все задачи");
+      break;
+    case storage::Filter::ShowToday:
+      m_view->setTaskListTitle("Задачи на " + QDate::currentDate().toString("dd.MM.yyyy"));
+      break;
+    case storage::Filter::ShowOverdue:
+      m_view->setTaskListTitle("Просроченные задачи");
+      break;
+    default:
+      m_view->setTaskListTitle("Список задач");
+      break;
+    }
   }
 
   tasks = m_storage->getSortedTasks(tasks, m_activeCriterion);
