@@ -1,6 +1,7 @@
 #ifndef ISTORAGE_H
 #define ISTORAGE_H
 #include "task.hpp"
+#include "igamification_storage.hpp"
 
 namespace storage
 {
@@ -26,29 +27,6 @@ namespace storage
     ShowToday,
     ShowOverdue,
     Priority
-  };
-
-  struct Achievement
-  {
-    QString id;
-    QString name;
-    QString description;
-    QString iconPath;
-    bool isUnlocked;
-    QDate unlockedDate;
-    int xpReward;
-  };
-
-  struct UserProgress
-  {
-    int currentLevel;
-    int currentXP;
-    int xpToNextLevel;
-    int streakDays;
-    QDate lastActivityDate;
-    QString currentTitle;
-    QList< QString > unlockedAchievements;
-    QList< QString > unlockedLocations;
   };
 
   class IStorage
