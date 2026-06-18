@@ -28,6 +28,29 @@ namespace storage
     Priority
   };
 
+  struct Achievement
+  {
+    QString id;
+    QString name;
+    QString description;
+    QString iconPath;
+    bool isUnlocked;
+    QDate unlockedDate;
+    int xpReward;
+  };
+
+  struct UserProgress
+  {
+    int currentLevel;
+    int currentXP;
+    int xpToNextLevel;
+    int streakDays;
+    QDate lastActivityDate;
+    QString currentTitle;
+    QList< QString > unlockedAchievements;
+    QList< QString > unlockedLocations;
+  };
+
   class IStorage
   {
   public:
@@ -42,9 +65,28 @@ namespace storage
     virtual QList< Task > getTasksFiltered(const QString &searchText, bool today, bool overdue, Priority priority) const = 0;
     virtual QList< Task > getSortedTasks(const QList< Task > &tasks, Criterion criterion) const = 0;
 
+    virtual UserProgress getUserProgress() const = 0;
+    virtual void updateUserProgress(const UserProgress &progress) = 0;
+    virtual void addXP(int amount, const QString &reason) = 0;
+    virtual void updateStreak(const QDate &currentDate) = 0;
+    virtual int getCurrentLevel() const = 0;
+    virtual int getTotalXP() const = 0;
+    virtual int getStreakDays() const = 0;
+
+    virtual QList< Achievement > getAllAchievements() const = 0;
+    virtual void unlockAchievement(const QString &achievementId) = 0;
+    virtual bool isAchievementUnlocked(const QString &achievementId) const = 0;
+    virtual Achievement getAchievementById(const QString &id) const = 0;
+
+    virtual QList< QString > getUnlockedLocations() const = 0;
+    virtual void unlockLocation(const QString &locationId) = 0;
+    virtual bool isLocationUnlocked(const QString &locationId) const = 0;
+
   private:
     virtual void saveToFile() noexcept = 0;
     virtual void loadFromFile() noexcept = 0;
+    virtual void saveGamificationData() noexcept = 0;
+    virtual void loadGamificationData() noexcept = 0;
   };
 }
 
