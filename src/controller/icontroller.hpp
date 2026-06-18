@@ -30,6 +30,19 @@ namespace controller
     virtual void onDateSelected(const QDate &date) = 0;
     virtual void onSortRequested(storage::Criterion criterion) = 0;
     virtual void onFilterChanged(storage::Filter filter, const QVariant &value) = 0;
+
+    virtual void onTaskCompleted(int taskId) = 0;
+    virtual void onDailyTasksCompleted() = 0;
+
+    virtual void onAchievementsRequested() = 0;
+    virtual void onMapRequested() = 0;
+    virtual void onStatisticsRequested() = 0;
+
+    virtual void onNewDay(const QDate &date) = 0;
+    virtual void onApplicationStart() = 0;
+
+    virtual void onCheckAchievements() = 0;
+    virtual void onCalculateXP(int taskId) = 0;
   };
 }
 
