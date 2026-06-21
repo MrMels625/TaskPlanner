@@ -9,7 +9,10 @@
 
 #include "../storage/istorage.hpp"
 #include "../view/iview.hpp"
+
+#ifndef TEST_BUILD
 #include "../view/taskplannerview.hpp"
+#endif
 
 controller::Controller::Controller(QObject *parent):
   IController(parent),
@@ -49,6 +52,7 @@ void controller::Controller::start()
     return;
   }
 
+#ifndef TEST_BUILD
   auto *view_ptr = dynamic_cast< view::TaskPlannerView* >(m_view);
   if (!view_ptr)
   {
@@ -66,6 +70,7 @@ void controller::Controller::start()
   QObject::connect(view_ptr, &view::TaskPlannerView::dateSelected, this, &controller::Controller::onDateSelected);
   QObject::connect(view_ptr, &view::TaskPlannerView::sortRequested, this, &controller::Controller::onSortRequested);
   QObject::connect(view_ptr, &view::TaskPlannerView::filterChanged, this, &controller::Controller::onFilterChanged);
+#endif
 }
 
 bool controller::Controller::checkReady() const
@@ -101,22 +106,22 @@ bool controller::Controller::validateTask(const storage::Task &task) const
 }
 
 bool controller::Controller::priorityMatches(
-  storage::Task::Priority taskPriority,
+  storage::Priority taskPriority,
   storage::Priority filterPriority)
 {
   switch (filterPriority)
   {
     case storage::Priority::Low:
     {
-      return taskPriority == storage::Task::Priority::Low;
+      return taskPriority == storage::Priority::Low;
     }
     case storage::Priority::Medium:
     {
-      return taskPriority == storage::Task::Priority::Medium;
+      return taskPriority == storage::Priority::Medium;
     }
     case storage::Priority::Hard:
     {
-      return taskPriority == storage::Task::Priority::Hard;
+      return taskPriority == storage::Priority::Hard;
     }
     case storage::Priority::All:
     default:
@@ -276,6 +281,7 @@ void controller::Controller::onTaskEditRequested(int task_id)
 
 void controller::Controller::onTaskViewRequested(int task_id)
 {
+#ifndef TEST_BUILD
   if (!checkReady())
   {
     return;
@@ -297,6 +303,7 @@ void controller::Controller::onTaskViewRequested(int task_id)
   }
 
   m_view->showErrorMessage("Task with ID " + QString::number(task_id) + " not found.");
+#endif
 }
 
 void controller::Controller::onTaskUpdateRequested(const storage::Task &task)

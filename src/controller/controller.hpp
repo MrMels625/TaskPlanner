@@ -2,6 +2,7 @@
 #define CONTROLLER_HPP
 
 #include "icontroller.hpp"
+#include "../storage/task.hpp"
 #include "../storage/istorage.hpp"
 #include "../view/iview.hpp"
 
@@ -48,7 +49,7 @@ namespace controller
     bool validateTask(const storage::Task &task) const;
     void refreshView();
     void updateStats();
-    static bool priorityMatches(storage::Task::Priority taskPriority, storage::Priority filterPriority);
+    static bool priorityMatches(storage::Priority taskPriority, storage::Priority filterPriority);
 
     storage::IStorage *m_storage;
     view::IView *m_view;
