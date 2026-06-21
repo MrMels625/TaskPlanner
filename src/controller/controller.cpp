@@ -100,6 +100,32 @@ bool controller::Controller::validateTask(const storage::Task &task) const
   return true;
 }
 
+bool controller::Controller::priorityMatches(
+  storage::Task::Priority taskPriority,
+  storage::Priority filterPriority)
+{
+  switch (filterPriority)
+  {
+    case storage::Priority::Low:
+    {
+      return taskPriority == storage::Task::Priority::Low;
+    }
+    case storage::Priority::Medium:
+    {
+      return taskPriority == storage::Task::Priority::Medium;
+    }
+    case storage::Priority::Hard:
+    {
+      return taskPriority == storage::Task::Priority::Hard;
+    }
+    case storage::Priority::All:
+    default:
+    {
+      return true;
+    }
+  }
+}
+
 void controller::Controller::refreshView()
 {
   if (!checkReady())
@@ -117,26 +143,26 @@ void controller::Controller::refreshView()
   {
     switch (m_scopeFilter)
     {
-      case storage::Filter::ShowAll:
-      {
-        tasks = m_storage->getAllTasks();
-        break;
-      }
-      case storage::Filter::ShowToday:
-      {
-        tasks = m_storage->getTasksForToday();
-        break;
-      }
-      case storage::Filter::ShowOverdue:
-      {
-        tasks = m_storage->getOverdueTasks();
-        break;
-      }
-      default:
-      {
-        tasks = m_storage->getAllTasks();
-        break;
-      }
+    case storage::Filter::ShowAll:
+    {
+      tasks = m_storage->getAllTasks();
+      break;
+    }
+    case storage::Filter::ShowToday:
+    {
+      tasks = m_storage->getTasksForToday();
+      break;
+    }
+    case storage::Filter::ShowOverdue:
+    {
+      tasks = m_storage->getOverdueTasks();
+      break;
+    }
+    default:
+    {
+      tasks = m_storage->getAllTasks();
+      break;
+    }
     }
   }
 
@@ -146,7 +172,7 @@ void controller::Controller::refreshView()
       std::remove_if(tasks.begin(), tasks.end(),
                      [this](const storage::Task &task)
                      {
-                       return task.priority != static_cast< storage::Priority >(m_priorityFilter);
+                       return !priorityMatches(task.priority, m_priorityFilter);
                      }),
       tasks.end());
   }
@@ -160,17 +186,25 @@ void controller::Controller::refreshView()
     switch (m_scopeFilter)
     {
     case storage::Filter::ShowAll:
+    {
       m_view->setTaskListTitle("Все задачи");
       break;
+    }
     case storage::Filter::ShowToday:
+    {
       m_view->setTaskListTitle("Задачи на " + QDate::currentDate().toString("dd.MM.yyyy"));
       break;
+    }
     case storage::Filter::ShowOverdue:
+    {
       m_view->setTaskListTitle("Просроченные задачи");
       break;
+    }
     default:
+    {
       m_view->setTaskListTitle("Список задач");
       break;
+    }
     }
   }
 
@@ -389,7 +423,7 @@ void controller::Controller::onFilterChanged(storage::Filter filter, const QVari
     m_dateSelected = false;
     m_selectedDate = QDate();
     m_scopeFilter = storage::Filter::ShowAll;
-    assert(value.canConvert< QString  >());
+    assert(value.canConvert< QString >());
     const QString text = value.toString();
     QList< storage::Task > tasks = m_storage->getTasksFiltered(
       text, false, false, m_priorityFilter);
@@ -406,4 +440,41 @@ void controller::Controller::onFilterChanged(storage::Filter filter, const QVari
   }
 
   refreshView();
+}
+
+// ─── временные заглушки геймификации ─────────────────────────────────────────
+// TODO: делегировать в IGamificationController, когда модуль геймификации
+// будет полностью спроектирован. Пока что не выполняют никакой логики.
+
+void controller::Controller::onTaskCompleted(int taskId)
+{
+  Q_UNUSED(taskId);
+}
+
+void controller::Controller::onDailyTasksCompleted()
+{}
+
+void controller::Controller::onAchievementsRequested()
+{}
+
+void controller::Controller::onMapRequested()
+{}
+
+void controller::Controller::onStatisticsRequested()
+{}
+
+void controller::Controller::onNewDay(const QDate &date)
+{
+  Q_UNUSED(date);
+}
+
+void controller::Controller::onApplicationStart()
+{}
+
+void controller::Controller::onCheckAchievements()
+{}
+
+void controller::Controller::onCalculateXP(int taskId)
+{
+  Q_UNUSED(taskId);
 }

@@ -41,6 +41,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         test/controller/main_test.cpp
+        src/storage/achievement.hpp
     )
 else()
     if(ANDROID)
