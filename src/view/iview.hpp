@@ -6,6 +6,7 @@
 #include <QString>
 #include <QVariant>
 
+#include "../storage/achievement.hpp"
 #include "../storage/istorage.hpp"
 #include "../storage/task.hpp"
 
