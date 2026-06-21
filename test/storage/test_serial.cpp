@@ -8,52 +8,45 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 
-// ---------------------------------------------------------------------------
-// Вспомогательные утилиты
-// ---------------------------------------------------------------------------
 static storage::Task fullTask()
 {
   storage::Task t;
-  t.id          = 7;
-  t.name        = "Write tests";
+  t.id = 7;
+  t.name = "Write tests";
   t.description = "Cover storage module";
-  t.discipline  = "engineering";
-  t.deadline    = QDateTime::fromString("2025-06-15T10:00:00", Qt::ISODate);
-  t.priority    = storage::Priority::Hard;
-  t.completed   = true;
-  t.tags        = {"boost", "qt"};
+  t.discipline = "engineering";
+  t.deadline = QDateTime::fromString("2025-06-15T10:00:00", Qt::ISODate);
+  t.priority = storage::Priority::Hard;
+  t.completed = true;
+  t.tags = {"boost", "qt"};
   return t;
 }
 
-// Сравнение двух задач (без учёта id для некоторых тестов)
 static bool tasksEqual(const storage::Task &a, const storage::Task &b)
 {
-  return a.id          == b.id
-      && a.name        == b.name
+  return a.id == b.id
+      && a.name == b.name
       && a.description == b.description
-      && a.discipline  == b.discipline
-      && a.deadline    == b.deadline
-      && a.priority    == b.priority
-      && a.completed   == b.completed
-      && a.tags        == b.tags;
+      && a.discipline == b.discipline
+      && a.deadline == b.deadline
+      && a.priority == b.priority
+      && a.completed == b.completed
+      && a.tags == b.tags;
 }
 
-// ---------------------------------------------------------------------------
 BOOST_AUTO_TEST_SUITE(SerialUtils)
-
-// --- taskToJson ------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(TaskToJson_ContainsAllFields)
 {
-  const auto t   = fullTask();
+  const auto t = fullTask();
   const auto obj = storage::serial::taskToJson(t);
 
-  BOOST_CHECK(obj["id"].toInt()          == t.id);
-  BOOST_CHECK(obj["name"].toString()     == t.name);
+  BOOST_CHECK(obj["id"].toInt() == t.id);
+  BOOST_CHECK(obj["name"].toString() == t.name);
   BOOST_CHECK(obj["description"].toString() == t.description);
-  BOOST_CHECK(obj["discipline"].toString()  == t.discipline);
-  BOOST_CHECK(obj["completed"].toBool()  == t.completed);
-  BOOST_CHECK(obj["priority"].toInt()    == static_cast<int>(t.priority));
+  BOOST_CHECK(obj["discipline"].toString() == t.discipline);
+  BOOST_CHECK(obj["completed"].toBool() == t.completed);
+  BOOST_CHECK(obj["priority"].toInt() == static_cast< int >(t.priority));
 
   const QDateTime dt = QDateTime::fromString(obj["deadline"].toString(), Qt::ISODate);
   BOOST_CHECK(dt == t.deadline);
@@ -61,7 +54,7 @@ BOOST_AUTO_TEST_CASE(TaskToJson_ContainsAllFields)
 
 BOOST_AUTO_TEST_CASE(TaskToJson_TagsArray)
 {
-  const auto t   = fullTask();
+  const auto t = fullTask();
   const auto obj = storage::serial::taskToJson(t);
 
   const QJsonArray tags = obj["tags"].toArray();
@@ -72,18 +65,16 @@ BOOST_AUTO_TEST_CASE(TaskToJson_TagsArray)
 
 BOOST_AUTO_TEST_CASE(TaskToJson_EmptyTags)
 {
-  auto t  = fullTask();
-  t.tags  = {};
+  auto t = fullTask();
+  t.tags = {};
   auto obj = storage::serial::taskToJson(t);
   BOOST_CHECK(obj["tags"].toArray().isEmpty());
 }
 
-// --- taskFromJson ----------------------------------------------------------
-
 BOOST_AUTO_TEST_CASE(RoundTrip_FullTask)
 {
-  const auto original  = fullTask();
-  const auto obj       = storage::serial::taskToJson(original);
+  const auto original = fullTask();
+  const auto obj = storage::serial::taskToJson(original);
   const auto recovered = storage::serial::taskFromJson(obj);
 
   BOOST_CHECK(tasksEqual(original, recovered));
@@ -92,8 +83,8 @@ BOOST_AUTO_TEST_CASE(RoundTrip_FullTask)
 BOOST_AUTO_TEST_CASE(TaskFromJson_InvalidId_ReturnsEmpty)
 {
   QJsonObject obj;
-  obj["id"]       = 0;        // невалидный
-  obj["name"]     = "x";
+  obj["id"] = 0;
+  obj["name"] = "x";
   obj["deadline"] = QDateTime::currentDateTime().toString(Qt::ISODate);
   obj["priority"] = 1;
 
@@ -104,8 +95,8 @@ BOOST_AUTO_TEST_CASE(TaskFromJson_InvalidId_ReturnsEmpty)
 BOOST_AUTO_TEST_CASE(TaskFromJson_MissingName_ReturnsEmpty)
 {
   QJsonObject obj;
-  obj["id"]       = 5;
-  obj["name"]     = "";       // пустое имя — невалидно
+  obj["id"] = 5;
+  obj["name"] = "";
   obj["deadline"] = QDateTime::currentDateTime().toString(Qt::ISODate);
   obj["priority"] = 1;
 
@@ -116,8 +107,8 @@ BOOST_AUTO_TEST_CASE(TaskFromJson_MissingName_ReturnsEmpty)
 BOOST_AUTO_TEST_CASE(TaskFromJson_InvalidDeadline_ReturnsEmpty)
 {
   QJsonObject obj;
-  obj["id"]       = 5;
-  obj["name"]     = "valid";
+  obj["id"] = 5;
+  obj["name"] = "valid";
   obj["deadline"] = "not-a-date";
   obj["priority"] = 1;
 
@@ -128,10 +119,10 @@ BOOST_AUTO_TEST_CASE(TaskFromJson_InvalidDeadline_ReturnsEmpty)
 BOOST_AUTO_TEST_CASE(TaskFromJson_OutOfRangePriority_ReturnsEmpty)
 {
   QJsonObject obj;
-  obj["id"]       = 5;
-  obj["name"]     = "valid";
+  obj["id"] = 5;
+  obj["name"] = "valid";
   obj["deadline"] = QDateTime::currentDateTime().toString(Qt::ISODate);
-  obj["priority"] = 99;       // нет такого приоритета
+  obj["priority"] = 99;
 
   const auto t = storage::serial::taskFromJson(obj);
   BOOST_CHECK(t.id <= 0);
@@ -140,15 +131,15 @@ BOOST_AUTO_TEST_CASE(TaskFromJson_OutOfRangePriority_ReturnsEmpty)
 BOOST_AUTO_TEST_CASE(TaskFromJson_AllPrioritiesAccepted)
 {
   using P = storage::Priority;
-  for (auto p : {P::All, P::Low, P::Medium, P::Hard})
+  for (auto p: { P::All, P::Low, P::Medium, P::Hard })
   {
     QJsonObject obj;
-    obj["id"]       = 1;
-    obj["name"]     = "task";
+    obj["id"] = 1;
+    obj["name"] = "task";
     obj["deadline"] = QDateTime::currentDateTime().toString(Qt::ISODate);
-    obj["priority"] = static_cast<int>(p);
+    obj["priority"] = static_cast< int >(p);
     obj["completed"]= false;
-    obj["tags"]     = QJsonArray{};
+    obj["tags"] = QJsonArray{};
 
     const auto t = storage::serial::taskFromJson(obj);
     BOOST_CHECK(t.id > 0);
@@ -156,20 +147,17 @@ BOOST_AUTO_TEST_CASE(TaskFromJson_AllPrioritiesAccepted)
   }
 }
 
-// --- tryLoad ---------------------------------------------------------------
-
 BOOST_AUTO_TEST_CASE(TryLoad_ValidFile_ReturnsTrueAndPopulates)
 {
   QTemporaryDir dir;
   BOOST_REQUIRE(dir.isValid());
 
-  // Составляем валидный JSON вручную
   const auto t   = fullTask();
   QJsonArray arr;
   arr.append(storage::serial::taskToJson(t));
 
   QJsonObject root;
-  root["tasks"]  = arr;
+  root["tasks"] = arr;
   root["nextId"] = 8;
 
   const QString path = dir.filePath("tasks.json");
@@ -178,7 +166,7 @@ BOOST_AUTO_TEST_CASE(TryLoad_ValidFile_ReturnsTrueAndPopulates)
   f.write(QJsonDocument(root).toJson());
   f.close();
 
-  QList<storage::Task> tasks;
+  QList< storage::Task > tasks;
   int nextId = 0;
   const bool ok = storage::serial::tryLoad(path, tasks, nextId);
 
@@ -190,7 +178,7 @@ BOOST_AUTO_TEST_CASE(TryLoad_ValidFile_ReturnsTrueAndPopulates)
 
 BOOST_AUTO_TEST_CASE(TryLoad_MissingFile_ReturnsFalse)
 {
-  QList<storage::Task> tasks;
+  QList< storage::Task > tasks;
   int nextId = 0;
   BOOST_CHECK(!storage::serial::tryLoad("/nonexistent/path/tasks.json", tasks, nextId));
 }
@@ -206,7 +194,7 @@ BOOST_AUTO_TEST_CASE(TryLoad_CorruptJson_ReturnsFalse)
   f.write("{ this is not valid json }}}");
   f.close();
 
-  QList<storage::Task> tasks;
+  QList< storage::Task > tasks;
   int nextId = 0;
   BOOST_CHECK(!storage::serial::tryLoad(path, tasks, nextId));
 }
@@ -225,7 +213,7 @@ BOOST_AUTO_TEST_CASE(TryLoad_MissingNextIdKey_ReturnsFalse)
   f.write(QJsonDocument(root).toJson());
   f.close();
 
-  QList<storage::Task> tasks;
+  QList< storage::Task > tasks;
   int nextId = 0;
   BOOST_CHECK(!storage::serial::tryLoad(path, tasks, nextId));
 }
@@ -236,14 +224,14 @@ BOOST_AUTO_TEST_CASE(TryLoad_InvalidTaskInArray_ReturnsFalse)
   BOOST_REQUIRE(dir.isValid());
 
   QJsonObject badTask;
-  badTask["id"]   = 0;
+  badTask["id"] = 0;
   badTask["name"] = "bad";
 
   QJsonArray arr;
   arr.append(badTask);
 
   QJsonObject root;
-  root["tasks"]  = arr;
+  root["tasks"] = arr;
   root["nextId"] = 1;
 
   const QString path = dir.filePath("tasks.json");
@@ -252,7 +240,7 @@ BOOST_AUTO_TEST_CASE(TryLoad_InvalidTaskInArray_ReturnsFalse)
   f.write(QJsonDocument(root).toJson());
   f.close();
 
-  QList<storage::Task> tasks;
+  QList< storage::Task > tasks;
   int nextId = 0;
   BOOST_CHECK(!storage::serial::tryLoad(path, tasks, nextId));
 }

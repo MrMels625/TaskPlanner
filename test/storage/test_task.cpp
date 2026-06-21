@@ -3,30 +3,28 @@
 #include "task.hpp"
 #include "istorage.hpp"
 
-// Вспомогательная фабрика задачи с разумными дефолтами
 static storage::Task makeTask(int id,
                               storage::Priority priority = storage::Priority::Medium,
                               const QDateTime &deadline  = QDateTime::currentDateTime())
 {
   storage::Task t;
-  t.id          = id;
-  t.name        = QString("Task %1").arg(id);
+  t.id = id;
+  t.name = QString("Task %1").arg(id);
   t.description = "desc";
-  t.discipline  = "math";
-  t.deadline    = deadline;
-  t.priority    = priority;
-  t.completed   = false;
+  t.discipline = "math";
+  t.deadline = deadline;
+  t.priority = priority;
+  t.completed = false;
   return t;
 }
 
-// ---------------------------------------------------------------------------
 BOOST_AUTO_TEST_SUITE(TaskOperators)
 
 BOOST_AUTO_TEST_CASE(EqualityById)
 {
   auto a = makeTask(1);
   auto b = makeTask(1);
-  b.name = "Different name";      // всё остальное другое — сравниваем только id
+  b.name = "Different name";
   BOOST_CHECK(a == b);
 }
 
@@ -37,12 +35,10 @@ BOOST_AUTO_TEST_CASE(InequalityDifferentIds)
   BOOST_CHECK(!(a == b));
 }
 
-// operator< сортирует сначала по deadline (раньше = меньше),
-// при одинаковом deadline — по priority (выше приоритет = меньше в сортировке)
 BOOST_AUTO_TEST_CASE(LessByDeadlineEarlierIsSmaller)
 {
   QDateTime earlier = QDateTime::currentDateTime();
-  QDateTime later   = earlier.addDays(1);
+  QDateTime later = earlier.addDays(1);
 
   auto a = makeTask(1, storage::Priority::Low, earlier);
   auto b = makeTask(2, storage::Priority::Low, later);
@@ -55,11 +51,10 @@ BOOST_AUTO_TEST_CASE(LessBySamePriorityDeadlineEqual)
 {
   QDateTime dt = QDateTime::currentDateTime();
 
-  auto a = makeTask(1, storage::Priority::Low,    dt);
+  auto a = makeTask(1, storage::Priority::Low, dt);
   auto b = makeTask(2, storage::Priority::Medium, dt);
-  auto c = makeTask(3, storage::Priority::Hard,   dt);
+  auto c = makeTask(3, storage::Priority::Hard, dt);
 
-  // Hard > Medium > Low  →  Hard «меньше» (идёт первым при сортировке по убыванию)
   BOOST_CHECK(c < b);
   BOOST_CHECK(b < a);
   BOOST_CHECK(c < a);
@@ -70,8 +65,7 @@ BOOST_AUTO_TEST_CASE(LessDeadlineTakesPriorityOverPriority)
   QDateTime earlier = QDateTime::currentDateTime();
   QDateTime later   = earlier.addDays(2);
 
-  // Low приоритет, но дедлайн раньше — должен идти первым
-  auto low_early  = makeTask(1, storage::Priority::Low,  earlier);
+  auto low_early  = makeTask(1, storage::Priority::Low, earlier);
   auto hard_later = makeTask(2, storage::Priority::Hard, later);
 
   BOOST_CHECK(low_early < hard_later);
@@ -86,12 +80,11 @@ BOOST_AUTO_TEST_CASE(EqualToSelf)
 
 BOOST_AUTO_TEST_SUITE_END()
 
-// ---------------------------------------------------------------------------
 BOOST_AUTO_TEST_SUITE(TaskFields)
 
 BOOST_AUTO_TEST_CASE(DefaultConstructorCompiles)
 {
-  storage::Task t;   // не должно падать
+  storage::Task t;
   (void)t;
   BOOST_TEST(true);
 }
@@ -99,7 +92,7 @@ BOOST_AUTO_TEST_CASE(DefaultConstructorCompiles)
 BOOST_AUTO_TEST_CASE(TagsStoredCorrectly)
 {
   auto t = makeTask(1);
-  t.tags = {"boost", "qt", "cpp"};
+  t.tags = { "boost", "qt", "cpp" };
   BOOST_TEST(t.tags.size() == 3);
   BOOST_CHECK(t.tags.contains("qt"));
 }
@@ -111,3 +104,4 @@ BOOST_AUTO_TEST_CASE(CompletedFlagDefault)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
