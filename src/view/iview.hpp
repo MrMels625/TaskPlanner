@@ -22,6 +22,7 @@ namespace view
     virtual void setTaskListTitle(const QString &title) = 0;
     virtual void showTaskCreationForm() = 0;
     virtual void showTaskCreationForm(const storage::Task &task) = 0;
+    virtual void showTaskDetails(const storage::Task &task) = 0;
     virtual void closeTaskCreationForm() = 0;
     virtual void showErrorMessage(const QString &message) = 0;
     virtual void showInfoMessage(const QString &message) = 0;
