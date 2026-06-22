@@ -111,23 +111,23 @@ bool controller::Controller::priorityMatches(
 {
   switch (filterPriority)
   {
-    case storage::Priority::Low:
-    {
-      return taskPriority == storage::Priority::Low;
-    }
-    case storage::Priority::Medium:
-    {
-      return taskPriority == storage::Priority::Medium;
-    }
-    case storage::Priority::Hard:
-    {
-      return taskPriority == storage::Priority::Hard;
-    }
-    case storage::Priority::All:
-    default:
-    {
-      return true;
-    }
+  case storage::Priority::Low:
+  {
+    return taskPriority == storage::Priority::Low;
+  }
+  case storage::Priority::Medium:
+  {
+    return taskPriority == storage::Priority::Medium;
+  }
+  case storage::Priority::Hard:
+  {
+    return taskPriority == storage::Priority::Hard;
+  }
+  case storage::Priority::All:
+  default:
+  {
+    return true;
+  }
   }
 }
 
@@ -448,10 +448,6 @@ void controller::Controller::onFilterChanged(storage::Filter filter, const QVari
 
   refreshView();
 }
-
-// ─── временные заглушки геймификации ─────────────────────────────────────────
-// TODO: делегировать в IGamificationController, когда модуль геймификации
-// будет полностью спроектирован. Пока что не выполняют никакой логики.
 
 void controller::Controller::onTaskCompleted(int taskId)
 {

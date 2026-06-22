@@ -2,30 +2,30 @@
 #define MOCKVIEW_HPP
 
 #include "iview.hpp"
-#include "achievement.hpp"  // добавлено для типа storage::Achievement
+#include "achievement.hpp"
 
 namespace test
 {
-class MockView : public view::IView
-{
+  class MockView : public view::IView
+  {
   public:
     MockView() = default;
     ~MockView() override = default;
 
-    void showTaskList(const QList<storage::Task>& tasks) override
+    void showTaskList(const QList<storage::Task> &tasks) override
     {
       showTaskListCallCount++;
       lastShownTasks = tasks;
     }
 
-    void showTasksForDate(const QDate& date, const QList<storage::Task>& tasks) override
+    void showTasksForDate(const QDate &date, const QList<storage::Task> &tasks) override
     {
       showTasksForDateCallCount++;
       lastDateArg = date;
       lastShownTasks = tasks;
     }
 
-    void setTaskListTitle(const QString& title) override
+    void setTaskListTitle(const QString &title) override
     {
       setTaskListTitleCallCount++;
       lastTitle = title;
@@ -37,7 +37,7 @@ class MockView : public view::IView
       lastFormHadTask = false;
     }
 
-    void showTaskCreationForm(const storage::Task& task) override
+    void showTaskCreationForm(const storage::Task &task) override
     {
       showTaskCreationFormCallCount++;
       lastFormHadTask = true;
@@ -49,13 +49,13 @@ class MockView : public view::IView
       closeTaskCreationFormCallCount++;
     }
 
-    void showErrorMessage(const QString& message) override
+    void showErrorMessage(const QString &message) override
     {
       showErrorMessageCallCount++;
       lastErrorMessage = message;
     }
 
-    void showInfoMessage(const QString& message) override
+    void showInfoMessage(const QString &message) override
     {
       showInfoMessageCallCount++;
       lastInfoMessage = message;
@@ -81,38 +81,38 @@ class MockView : public view::IView
       Q_UNUSED(days);
     }
 
-    void showUserTitle(const QString& title) override
+    void showUserTitle(const QString &title) override
     {
       Q_UNUSED(title);
     }
 
-    void showXPNotification(int amount, const QString& reason) override
+    void showXPNotification(int amount, const QString &reason) override
     {
       Q_UNUSED(amount);
       Q_UNUSED(reason);
     }
 
-    void showAchievementUnlocked(const storage::Achievement& achievement) override
+    void showAchievementUnlocked(const storage::Achievement &achievement) override
     {
       Q_UNUSED(achievement);
     }
 
-    void showAchievementsList(const QList<storage::Achievement>& achievements) override
+    void showAchievementsList(const QList<storage::Achievement> &achievements) override
     {
       Q_UNUSED(achievements);
     }
 
-    void showCampusMap(const QList<QString>& unlockedLocations) override
+    void showCampusMap(const QList<QString> &unlockedLocations) override
     {
       Q_UNUSED(unlockedLocations);
     }
 
-    void showLocationUnlocked(const QString& locationName) override
+    void showLocationUnlocked(const QString &locationName) override
     {
       Q_UNUSED(locationName);
     }
 
-    void showLevelUpAnimation(int newLevel, const QString& newTitle) override
+    void showLevelUpAnimation(int newLevel, const QString &newTitle) override
     {
       Q_UNUSED(newLevel);
       Q_UNUSED(newTitle);

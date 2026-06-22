@@ -88,12 +88,8 @@ void ControllerTest::cleanup()
   m_storage = nullptr;
 }
 
-storage::Task ControllerTest::makeTask(
-  int id,
-  const QString &name,
-  storage::Priority priority,
-  const QDateTime &deadline,
-  bool completed) const
+storage::Task ControllerTest::makeTask(int id, const QString &name, storage::Priority priority,
+  const QDateTime &deadline, bool completed) const
 {
   storage::Task task;
   task.id = id;
@@ -165,8 +161,7 @@ void ControllerTest::onTaskAddRequested_validTask_addsToStorage()
 
 void ControllerTest::onTaskAddRequested_emptyName_rejectsAndShowsError()
 {
-  const storage::Task task = makeTask(
-    1, "", storage::Priority::Low, QDateTime::currentDateTime().addDays(1));
+  const storage::Task task = makeTask(1, "", storage::Priority::Low, QDateTime::currentDateTime().addDays(1));
 
   m_controller->onTaskAddRequested(task);
 
@@ -243,8 +238,7 @@ void ControllerTest::onTaskUpdateRequested_emptyName_rejectsAndShowsError()
 
 void ControllerTest::onTaskDeleteRequested_existingTask_removesAndNotifies()
 {
-  const storage::Task task = makeTask(
-    7, "To delete", storage::Priority::Low, QDateTime::currentDateTime().addDays(1));
+  const storage::Task task = makeTask(7, "To delete", storage::Priority::Low, QDateTime::currentDateTime().addDays(1));
   m_storage->setTasks({task});
 
   m_controller->onTaskDeleteRequested(7);
@@ -266,8 +260,7 @@ void ControllerTest::onTaskDeleteRequested_missingTask_stillRemovesQuietly()
 
 void ControllerTest::onCompleteRequested_existingTask_togglesCompletion()
 {
-  const storage::Task task = makeTask(
-    3, "Toggle me", storage::Priority::Low,
+  const storage::Task task = makeTask(3, "Toggle me", storage::Priority::Low,
     QDateTime::currentDateTime().addDays(1), false);
   m_storage->setTasks({task});
 
@@ -355,8 +348,7 @@ void ControllerTest::onFilterChanged_showAll_setsCorrectTitle()
 void ControllerTest::onFilterChanged_showToday_setsCorrectTitle()
 {
   m_controller->onFilterChanged(storage::Filter::ShowToday, QVariant());
-  QCOMPARE(m_view->lastTitle,
-           QString("Задачи на " + QDate::currentDate().toString("dd.MM.yyyy")));
+  QCOMPARE(m_view->lastTitle, QString("Задачи на " + QDate::currentDate().toString("dd.MM.yyyy")));
   QCOMPARE(m_storage->getTasksForTodayCallCount, 2);
 }
 
@@ -376,8 +368,7 @@ void ControllerTest::onFilterChanged_scopeFilter_resetsSelectedDate()
   m_controller->onFilterChanged(storage::Filter::ShowToday, QVariant());
 
   QCOMPARE(m_storage->getTasksForTodayCallCount, 3);
-  QCOMPARE(m_view->lastTitle,
-           QString("Задачи на " + QDate::currentDate().toString("dd.MM.yyyy")));
+  QCOMPARE(m_view->lastTitle, QString("Задачи на " + QDate::currentDate().toString("dd.MM.yyyy")));
 
   QCOMPARE(m_storage->getTasksForDateCallCount, 1);
 }
@@ -388,14 +379,12 @@ void ControllerTest::onFilterChanged_priorityFilter_doesNotResetScope()
   QCOMPARE(m_storage->getTasksForTodayCallCount, 2);
   const int allTasksAfterFirst = m_storage->getAllTasksCallCount;
 
-  m_controller->onFilterChanged(
-    storage::Filter::Priority, QVariant::fromValue(storage::Priority::Hard));
+  m_controller->onFilterChanged(storage::Filter::Priority, QVariant::fromValue(storage::Priority::Hard));
 
   QCOMPARE(m_storage->getTasksForTodayCallCount, 4);
   QCOMPARE(m_storage->getAllTasksCallCount, allTasksAfterFirst + 1);
 
-  QCOMPARE(m_view->lastTitle,
-           QString("Задачи на " + QDate::currentDate().toString("dd.MM.yyyy")));
+  QCOMPARE(m_view->lastTitle, QString("Задачи на " + QDate::currentDate().toString("dd.MM.yyyy")));
 }
 
 void ControllerTest::onFilterChanged_priorityFilter_doesNotResetSelectedDate()
@@ -404,8 +393,7 @@ void ControllerTest::onFilterChanged_priorityFilter_doesNotResetSelectedDate()
   m_controller->onDateSelected(date);
   QCOMPARE(m_storage->getTasksForDateCallCount, 1);
 
-  m_controller->onFilterChanged(
-    storage::Filter::Priority, QVariant::fromValue(storage::Priority::Low));
+  m_controller->onFilterChanged(storage::Filter::Priority, QVariant::fromValue(storage::Priority::Low));
 
   QCOMPARE(m_storage->getTasksForDateCallCount, 2);
   QCOMPARE(m_view->lastTitle, QString("Задачи на " + date.toString("dd.MM.yyyy")));
@@ -419,8 +407,7 @@ void ControllerTest::onFilterChanged_priorityAll_showsEverything()
     makeTask(3, "Hard", storage::Priority::Hard, QDateTime::currentDateTime().addDays(1)),
   });
 
-  m_controller->onFilterChanged(
-    storage::Filter::Priority, QVariant::fromValue(storage::Priority::All));
+  m_controller->onFilterChanged(storage::Filter::Priority, QVariant::fromValue(storage::Priority::All));
 
   QCOMPARE(m_view->lastShownTasks.size(), 3);
 }
@@ -433,8 +420,7 @@ void ControllerTest::onFilterChanged_priorityLow_filtersOnlyLowTasks()
     makeTask(3, "Hard", storage::Priority::Hard, QDateTime::currentDateTime().addDays(1)),
   });
 
-  m_controller->onFilterChanged(
-    storage::Filter::Priority, QVariant::fromValue(storage::Priority::Low));
+  m_controller->onFilterChanged(storage::Filter::Priority, QVariant::fromValue(storage::Priority::Low));
 
   QCOMPARE(m_view->lastShownTasks.size(), 1);
   QCOMPARE(m_view->lastShownTasks.first().id, 1);
@@ -447,20 +433,20 @@ void ControllerTest::onFilterChanged_search_resetsDateAndScope()
 
   m_storage->filteredTasksToReturn = {
     makeTask(1, "Found", storage::Priority::Low, QDateTime::currentDateTime().addDays(1))
-};
+  };
 
-m_controller->onFilterChanged(storage::Filter::Search, QVariant("найти"));
+  m_controller->onFilterChanged(storage::Filter::Search, QVariant("найти"));
 
-QCOMPARE(m_storage->getTasksFilteredCallCount, 1);
-QCOMPARE(m_storage->lastSearchText, QString("найти"));
+  QCOMPARE(m_storage->getTasksFilteredCallCount, 1);
+  QCOMPARE(m_storage->lastSearchText, QString("найти"));
 
-const int todayCountBefore = m_storage->getTasksForTodayCallCount;
-const int dateCountBefore = m_storage->getTasksForDateCallCount;
+  const int todayCountBefore = m_storage->getTasksForTodayCallCount;
+  const int dateCountBefore = m_storage->getTasksForDateCallCount;
 
-m_controller->onFilterChanged(storage::Filter::ShowToday, QVariant());
+  m_controller->onFilterChanged(storage::Filter::ShowToday, QVariant());
 
-QCOMPARE(m_storage->getTasksForTodayCallCount, todayCountBefore + 2);
-QCOMPARE(m_storage->getTasksForDateCallCount, dateCountBefore);
+  QCOMPARE(m_storage->getTasksForTodayCallCount, todayCountBefore + 2);
+  QCOMPARE(m_storage->getTasksForDateCallCount, dateCountBefore);
 }
 
 void ControllerTest::onFilterChanged_search_callsGetTasksFilteredWithText()
@@ -484,8 +470,7 @@ void ControllerTest::combination_scopeTodayPlusPriorityLow_bothApply()
   m_controller->onFilterChanged(storage::Filter::ShowToday, QVariant());
   const int todayCountAfterFirst = m_storage->getTasksForTodayCallCount;
 
-  m_controller->onFilterChanged(
-    storage::Filter::Priority, QVariant::fromValue(storage::Priority::Low));
+  m_controller->onFilterChanged(storage::Filter::Priority, QVariant::fromValue(storage::Priority::Low));
 
   QCOMPARE(m_storage->getTasksForTodayCallCount, todayCountAfterFirst + 2);
   QCOMPARE(m_view->lastShownTasks.size(), 1);
@@ -503,8 +488,7 @@ void ControllerTest::combination_dateSelectedPlusPriority_bothApply()
   });
 
   m_controller->onDateSelected(date);
-  m_controller->onFilterChanged(
-    storage::Filter::Priority, QVariant::fromValue(storage::Priority::Hard));
+  m_controller->onFilterChanged(storage::Filter::Priority, QVariant::fromValue(storage::Priority::Hard));
 
   QCOMPARE(m_view->lastShownTasks.size(), 1);
   QCOMPARE(m_view->lastShownTasks.first().id, 2);

@@ -32,8 +32,6 @@ namespace controller
     void onSortRequested(storage::Criterion criterion) override;
     void onFilterChanged(storage::Filter filter, const QVariant &value) override;
 
-    // ─── временные заглушки геймификации ──────────────────────────────────
-    // TODO: делегировать в IGamificationController, когда модуль будет готов
     void onTaskCompleted(int taskId) override;
     void onDailyTasksCompleted() override;
     void onAchievementsRequested() override;

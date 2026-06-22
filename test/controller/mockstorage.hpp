@@ -8,8 +8,8 @@
 
 namespace test
 {
-class MockStorage: public storage::IStorage
-{
+  class MockStorage: public storage::IStorage
+  {
   public:
     MockStorage() = default;
     ~MockStorage() override = default;
@@ -39,7 +39,7 @@ class MockStorage: public storage::IStorage
     {
       updateTaskCallCount++;
       lastUpdatedTask = task;
-      for (auto &existing : m_tasks)
+      for (auto &existing: m_tasks)
       {
         if (existing.id == task.id)
         {
@@ -60,7 +60,7 @@ class MockStorage: public storage::IStorage
       getTasksForDateCallCount++;
       lastQueriedDate = date;
       QList< storage::Task > result;
-      for (const auto &task : m_tasks)
+      for (const auto &task: m_tasks)
       {
         if (task.deadline.date() == date)
         {
@@ -82,11 +82,8 @@ class MockStorage: public storage::IStorage
       return overdueTasksToReturn;
     }
 
-    QList< storage::Task > getTasksFiltered(
-      const QString &searchText,
-      bool today,
-      bool overdue,
-      storage::Priority priority) const override
+    QList< storage::Task > getTasksFiltered(const QString &searchText, bool today,
+      bool overdue, storage::Priority priority) const override
     {
       getTasksFilteredCallCount++;
       lastSearchText = searchText;
@@ -96,8 +93,7 @@ class MockStorage: public storage::IStorage
       return filteredTasksToReturn;
     }
 
-    QList< storage::Task > getSortedTasks(
-      const QList< storage::Task > &tasks,
+    QList< storage::Task > getSortedTasks(const QList< storage::Task > &tasks,
       storage::Criterion criterion) const override
     {
       getSortedTasksCallCount++;
