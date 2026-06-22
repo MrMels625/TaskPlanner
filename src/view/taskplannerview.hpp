@@ -69,6 +69,7 @@ namespace view
     void clearStatusMessage();
     void onGamificationAchievementsRequested();
     void onGamificationMapRequested();
+    void onGroupBoxAchievementsClicked(bool checked);
 
   private:
     void connectSignals();
