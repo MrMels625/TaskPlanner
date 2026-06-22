@@ -38,9 +38,9 @@ namespace view
     void setAchievementLabels(const QList< QLabel* > &labels);
 
   signals:
-    void gamificationViewReady() override;
-    void achievementsRequested() override;
-    void mapRequested() override;
+    void gamificationViewReady();
+    void achievementsRequested();
+    void mapRequested();
 
   private:
     QLabel *m_levelLabel;

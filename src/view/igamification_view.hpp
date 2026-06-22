@@ -24,11 +24,6 @@ namespace view
     virtual void showLocationUnlocked(const QString &locationName) = 0;
 
     virtual void showLevelUpAnimation(int newLevel, const QString &newTitle) = 0;
-
-  signals:
-    void gamificationViewReady();
-    void achievementsRequested();
-    void mapRequested();
   };
 
 }
