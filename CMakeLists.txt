@@ -40,6 +40,8 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_add_executable(TaskPlanner
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        src/view/gamification_view.cpp
+        src/view/gamification_view.hpp
     )
 else()
     if(ANDROID)
