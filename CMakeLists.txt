@@ -40,6 +40,12 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_add_executable(TaskPlanner
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+
+        src/storage/achievement.hpp
+        test/controller/mockview.hpp
+        test/controller/mockstorage.hpp
+        test/controller/test_controller.pro
+        test/controller/test_controller.cpp
     )
 else()
     if(ANDROID)
