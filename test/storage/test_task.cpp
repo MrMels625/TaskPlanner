@@ -3,9 +3,8 @@
 #include "task.hpp"
 #include "istorage.hpp"
 
-static storage::Task makeTask(int id,
-                              storage::Priority priority = storage::Priority::Medium,
-                              const QDateTime &deadline  = QDateTime::currentDateTime())
+static storage::Task makeTask(int id, storage::Priority priority = storage::Priority::Medium, 
+    const QDateTime &deadline  = QDateTime::currentDateTime())
 {
   storage::Task t;
   t.id = id;
@@ -63,9 +62,9 @@ BOOST_AUTO_TEST_CASE(LessBySamePriorityDeadlineEqual)
 BOOST_AUTO_TEST_CASE(LessDeadlineTakesPriorityOverPriority)
 {
   QDateTime earlier = QDateTime::currentDateTime();
-  QDateTime later   = earlier.addDays(2);
+  QDateTime later = earlier.addDays(2);
 
-  auto low_early  = makeTask(1, storage::Priority::Low, earlier);
+  auto low_early = makeTask(1, storage::Priority::Low, earlier);
   auto hard_later = makeTask(2, storage::Priority::Hard, later);
 
   BOOST_CHECK(low_early < hard_later);

@@ -7,9 +7,9 @@ struct GlobalQtFixture
 {
   GlobalQtFixture()
   {
-    static int   argc = 1;
-    static char  name[] = "run_tests";
-    static char *argv[] = {name, nullptr};
+    static int argc = 1;
+    static char name[] = "run_tests";
+    static char *argv[] = { name, nullptr };
     app_ = new QCoreApplication(argc, argv);
   }
 
