@@ -2,6 +2,7 @@
 #define CONTROLLER_HPP
 
 #include "icontroller.hpp"
+#include "../storage/task.hpp"
 #include "../storage/istorage.hpp"
 #include "../view/iview.hpp"
 
@@ -31,11 +32,22 @@ namespace controller
     void onSortRequested(storage::Criterion criterion) override;
     void onFilterChanged(storage::Filter filter, const QVariant &value) override;
 
+    void onTaskCompleted(int taskId) override;
+    void onDailyTasksCompleted() override;
+    void onAchievementsRequested() override;
+    void onMapRequested() override;
+    void onStatisticsRequested() override;
+    void onNewDay(const QDate &date) override;
+    void onApplicationStart() override;
+    void onCheckAchievements() override;
+    void onCalculateXP(int taskId) override;
+
   private:
     bool checkReady() const;
     bool validateTask(const storage::Task &task) const;
     void refreshView();
     void updateStats();
+    static bool priorityMatches(storage::Priority taskPriority, storage::Priority filterPriority);
 
     storage::IStorage *m_storage;
     view::IView *m_view;

@@ -1,15 +1,26 @@
 #include "serial-utils.hpp"
-#include "istorage.hpp"
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include "istorage.hpp"
+
+namespace
+{
+  QString s_baseDirOverride;
+}
+
+void storage::serial::setBaseDirOverride(const QString &path)
+{
+  s_baseDirOverride = path;
+}
 
 QString storage::serial::filePath(const QString &name)
 {
-  return QCoreApplication::applicationDirPath() + QDir::separator() + name;
+  const QString base = s_baseDirOverride.isEmpty() ? QCoreApplication::applicationDirPath() : s_baseDirOverride;
+  return base + QDir::separator() + name;
 }
 
 QJsonObject storage::serial::taskToJson(const Task &task)
@@ -26,7 +37,7 @@ QJsonObject storage::serial::taskToJson(const Task &task)
   obj["description"] = task.description;
   obj["discipline"] = task.discipline;
   obj["deadline"] = task.deadline.toString(Qt::ISODate);
-  obj["priority"] = static_cast< int >(task.priority);
+  obj["priority"] = static_cast<int>(task.priority);
   obj["completed"] = task.completed;
   obj["tags"] = tagsArray;
   return obj;
@@ -61,11 +72,11 @@ storage::Task storage::serial::taskFromJson(const QJsonObject &obj)
   task.deadline = deadline;
 
   const int priorityInt = obj["priority"].toInt(-1);
-  if (priorityInt < static_cast< int >(Priority::All) || priorityInt > static_cast< int >(Priority::Hard))
+  if (priorityInt < static_cast<int>(Priority::All) || priorityInt > static_cast<int>(Priority::Hard))
   {
     return {};
   }
-  task.priority = static_cast< Priority >(priorityInt);
+  task.priority = static_cast<Priority>(priorityInt);
 
   task.completed = obj["completed"].toBool();
 
@@ -77,7 +88,7 @@ storage::Task storage::serial::taskFromJson(const QJsonObject &obj)
   return task;
 }
 
-bool storage::serial::tryLoad(const QString &path, QList< Task > &tasks, int &nextId)
+bool storage::serial::tryLoad(const QString &path, QList<Task> &tasks, int &nextId)
 {
   QFile f(path);
   if (!f.open(QIODevice::ReadOnly))
@@ -99,7 +110,7 @@ bool storage::serial::tryLoad(const QString &path, QList< Task > &tasks, int &ne
     return false;
   }
 
-  QList< Task > loaded;
+  QList<Task> loaded;
   for (const QJsonValue &v: root["tasks"].toArray())
   {
     if (!v.isObject())

@@ -101,7 +101,7 @@ void storage::MemoryStorage::addTask(const Task &task)
 
 void storage::MemoryStorage::removeTask(int id)
 {
-  for (size_t i = 0; i < tasks_.size(); ++i)
+  for (qsizetype i = 0; i < tasks_.size(); ++i)
   {
     if (tasks_[i].id == id)
     {
@@ -221,4 +221,77 @@ void storage::MemoryStorage::load() noexcept
 void storage::MemoryStorage::loadFromFile() noexcept
 {
   load();
+}
+
+storage::UserProgress storage::MemoryStorage::getUserProgress() const
+{
+  return {};
+}
+
+void storage::MemoryStorage::updateUserProgress(const UserProgress &)
+{
+}
+
+void storage::MemoryStorage::addXP(int, const QString &)
+{
+}
+
+void storage::MemoryStorage::updateStreak(const QDate &)
+{
+}
+
+int storage::MemoryStorage::getCurrentLevel() const
+{
+  return 1;
+}
+
+int storage::MemoryStorage::getTotalXP() const
+{
+  return 0;
+}
+
+int storage::MemoryStorage::getStreakDays() const
+{
+  return 0;
+}
+
+QList< storage::Achievement > storage::MemoryStorage::getAllAchievements() const
+{
+  return {};
+}
+
+void storage::MemoryStorage::unlockAchievement(const QString &)
+{
+}
+
+bool storage::MemoryStorage::isAchievementUnlocked(const QString &) const
+{
+  return false;
+}
+
+storage::Achievement storage::MemoryStorage::getAchievementById(const QString &) const
+{
+  return {};
+}
+
+QList< QString > storage::MemoryStorage::getUnlockedLocations() const
+{
+  return {};
+}
+
+void storage::MemoryStorage::unlockLocation(const QString &)
+{
+}
+
+bool storage::MemoryStorage::isLocationUnlocked(const QString &) const
+{
+  return false;
+}
+
+void storage::MemoryStorage::saveGamificationData() noexcept
+{
+}
+
+void storage::MemoryStorage::loadGamificationData() noexcept
+{
 }

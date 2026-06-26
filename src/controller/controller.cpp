@@ -9,7 +9,10 @@
 
 #include "../storage/istorage.hpp"
 #include "../view/iview.hpp"
+
+#ifndef TEST_BUILD
 #include "../view/taskplannerview.hpp"
+#endif
 
 controller::Controller::Controller(QObject *parent):
   IController(parent),
@@ -49,6 +52,7 @@ void controller::Controller::start()
     return;
   }
 
+#ifndef TEST_BUILD
   auto *view_ptr = dynamic_cast< view::TaskPlannerView* >(m_view);
   if (!view_ptr)
   {
@@ -66,6 +70,7 @@ void controller::Controller::start()
   QObject::connect(view_ptr, &view::TaskPlannerView::dateSelected, this, &controller::Controller::onDateSelected);
   QObject::connect(view_ptr, &view::TaskPlannerView::sortRequested, this, &controller::Controller::onSortRequested);
   QObject::connect(view_ptr, &view::TaskPlannerView::filterChanged, this, &controller::Controller::onFilterChanged);
+#endif
 }
 
 bool controller::Controller::checkReady() const
@@ -100,6 +105,32 @@ bool controller::Controller::validateTask(const storage::Task &task) const
   return true;
 }
 
+bool controller::Controller::priorityMatches(
+  storage::Priority taskPriority,
+  storage::Priority filterPriority)
+{
+  switch (filterPriority)
+  {
+  case storage::Priority::Low:
+  {
+    return taskPriority == storage::Priority::Low;
+  }
+  case storage::Priority::Medium:
+  {
+    return taskPriority == storage::Priority::Medium;
+  }
+  case storage::Priority::Hard:
+  {
+    return taskPriority == storage::Priority::Hard;
+  }
+  case storage::Priority::All:
+  default:
+  {
+    return true;
+  }
+  }
+}
+
 void controller::Controller::refreshView()
 {
   if (!checkReady())
@@ -117,26 +148,26 @@ void controller::Controller::refreshView()
   {
     switch (m_scopeFilter)
     {
-      case storage::Filter::ShowAll:
-      {
-        tasks = m_storage->getAllTasks();
-        break;
-      }
-      case storage::Filter::ShowToday:
-      {
-        tasks = m_storage->getTasksForToday();
-        break;
-      }
-      case storage::Filter::ShowOverdue:
-      {
-        tasks = m_storage->getOverdueTasks();
-        break;
-      }
-      default:
-      {
-        tasks = m_storage->getAllTasks();
-        break;
-      }
+    case storage::Filter::ShowAll:
+    {
+      tasks = m_storage->getAllTasks();
+      break;
+    }
+    case storage::Filter::ShowToday:
+    {
+      tasks = m_storage->getTasksForToday();
+      break;
+    }
+    case storage::Filter::ShowOverdue:
+    {
+      tasks = m_storage->getOverdueTasks();
+      break;
+    }
+    default:
+    {
+      tasks = m_storage->getAllTasks();
+      break;
+    }
     }
   }
 
@@ -146,7 +177,7 @@ void controller::Controller::refreshView()
       std::remove_if(tasks.begin(), tasks.end(),
                      [this](const storage::Task &task)
                      {
-                       return task.priority != static_cast< storage::Priority >(m_priorityFilter);
+                       return !priorityMatches(task.priority, m_priorityFilter);
                      }),
       tasks.end());
   }
@@ -160,17 +191,25 @@ void controller::Controller::refreshView()
     switch (m_scopeFilter)
     {
     case storage::Filter::ShowAll:
+    {
       m_view->setTaskListTitle("Все задачи");
       break;
+    }
     case storage::Filter::ShowToday:
+    {
       m_view->setTaskListTitle("Задачи на " + QDate::currentDate().toString("dd.MM.yyyy"));
       break;
+    }
     case storage::Filter::ShowOverdue:
+    {
       m_view->setTaskListTitle("Просроченные задачи");
       break;
+    }
     default:
+    {
       m_view->setTaskListTitle("Список задач");
       break;
+    }
     }
   }
 
@@ -242,6 +281,7 @@ void controller::Controller::onTaskEditRequested(int task_id)
 
 void controller::Controller::onTaskViewRequested(int task_id)
 {
+#ifndef TEST_BUILD
   if (!checkReady())
   {
     return;
@@ -263,6 +303,7 @@ void controller::Controller::onTaskViewRequested(int task_id)
   }
 
   m_view->showErrorMessage("Task with ID " + QString::number(task_id) + " not found.");
+#endif
 }
 
 void controller::Controller::onTaskUpdateRequested(const storage::Task &task)
@@ -389,7 +430,7 @@ void controller::Controller::onFilterChanged(storage::Filter filter, const QVari
     m_dateSelected = false;
     m_selectedDate = QDate();
     m_scopeFilter = storage::Filter::ShowAll;
-    assert(value.canConvert< QString  >());
+    assert(value.canConvert< QString >());
     const QString text = value.toString();
     QList< storage::Task > tasks = m_storage->getTasksFiltered(
       text, false, false, m_priorityFilter);
@@ -406,4 +447,37 @@ void controller::Controller::onFilterChanged(storage::Filter filter, const QVari
   }
 
   refreshView();
+}
+
+void controller::Controller::onTaskCompleted(int taskId)
+{
+  Q_UNUSED(taskId);
+}
+
+void controller::Controller::onDailyTasksCompleted()
+{}
+
+void controller::Controller::onAchievementsRequested()
+{}
+
+void controller::Controller::onMapRequested()
+{}
+
+void controller::Controller::onStatisticsRequested()
+{}
+
+void controller::Controller::onNewDay(const QDate &date)
+{
+  Q_UNUSED(date);
+}
+
+void controller::Controller::onApplicationStart()
+{}
+
+void controller::Controller::onCheckAchievements()
+{}
+
+void controller::Controller::onCalculateXP(int taskId)
+{
+  Q_UNUSED(taskId);
 }
