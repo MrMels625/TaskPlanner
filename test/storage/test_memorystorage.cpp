@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(AddTask_AssignsId)
   const auto all = s.getAllTasks();
   BOOST_REQUIRE(all.size() == 1);
   BOOST_TEST(all[0].id > 0);
-  BOOST_TEST(all[0].name == "First");
+  BOOST_CHECK(all[0].name == "First");
 }
 
 BOOST_AUTO_TEST_CASE(AddMultipleTasks_IdsIncrement)
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(AddMultipleTasks_IdsIncrement)
   s.addTask(makeTask("B", storage::Priority::Hard, QDateTime::currentDateTime()));
   const auto all = s.getAllTasks();
   BOOST_REQUIRE(all.size() == 2);
-  BOOST_TEST(all[1].id == all[0].id + 1);
+  BOOST_CHECK(all[1].id == all[0].id + 1);
 }
 
 BOOST_AUTO_TEST_CASE(RemoveTask_RemovesCorrectOne)
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(RemoveTask_RemovesCorrectOne)
   s.removeTask(removeId);
   const auto all = s.getAllTasks();
   BOOST_REQUIRE(all.size() == 1);
-  BOOST_TEST(all[0].name == "Keep");
+  BOOST_CHECK(all[0].name == "Keep");
 }
 
 BOOST_AUTO_TEST_CASE(RemoveTask_NonExistentId_NoEffect)
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE(RemoveTask_NonExistentId_NoEffect)
   storage::MemoryStorage s;
   s.addTask(makeTask("A", storage::Priority::Low, QDateTime::currentDateTime()));
   s.removeTask(9999);
-  BOOST_TEST(s.getAllTasks().size() == 1);
+  BOOST_CHECK(s.getAllTasks().size() == 1);
 }
 
 BOOST_AUTO_TEST_CASE(UpdateTask_ChangesFields)
@@ -87,8 +87,8 @@ BOOST_AUTO_TEST_CASE(UpdateTask_ChangesFields)
   s.updateTask(updated);
   const auto all = s.getAllTasks();
   BOOST_REQUIRE(all.size() == 1);
-  BOOST_TEST(all[0].name == "New name");
-  BOOST_TEST(all[0].priority == storage::Priority::Hard);
+  BOOST_CHECK(all[0].name == "New name");
+  BOOST_CHECK(all[0].priority == storage::Priority::Hard);
 }
 
 BOOST_AUTO_TEST_CASE(UpdateTask_NonExistentId_NoEffect)
@@ -101,8 +101,8 @@ BOOST_AUTO_TEST_CASE(UpdateTask_NonExistentId_NoEffect)
   ghost.deadline = QDateTime::currentDateTime();
   ghost.priority = storage::Priority::Low;
   s.updateTask(ghost);
-  BOOST_TEST(s.getAllTasks().size() == 1);
-  BOOST_TEST(s.getAllTasks()[0].name == "A");
+  BOOST_CHECK(s.getAllTasks().size() == 1);
+  BOOST_CHECK(s.getAllTasks()[0].name == "A");
 }
 
 BOOST_AUTO_TEST_CASE(GetTasksForDate_ReturnsOnlyMatchingDate)
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE(GetTasksForDate_ReturnsOnlyMatchingDate)
   s.addTask(makeTask("Tomorrow", storage::Priority::Low, QDateTime(tomorrow, QTime(12, 0))));
   const auto result = s.getTasksForDate(today);
   BOOST_REQUIRE(result.size() == 1);
-  BOOST_TEST(result[0].name == "Today");
+  BOOST_CHECK(result[0].name == "Today");
 }
 
 BOOST_AUTO_TEST_CASE(GetTasksForToday_ReturnsToday)
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(GetTasksForToday_ReturnsToday)
   s.addTask(makeTask("Past", storage::Priority::Low, QDateTime(today.addDays(-1), QTime(9, 0))));
   const auto result = s.getTasksForToday();
   BOOST_REQUIRE(result.size() == 1);
-  BOOST_TEST(result[0].name == "Today");
+  BOOST_CHECK(result[0].name == "Today");
 }
 
 BOOST_AUTO_TEST_CASE(GetOverdueTasks_ReturnsExpired_NotCompleted)
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(GetOverdueTasks_ReturnsExpired_NotCompleted)
   s.addTask(makeTask("Future", storage::Priority::Low, future, false));
   const auto result = s.getOverdueTasks();
   BOOST_REQUIRE(result.size() == 1);
-  BOOST_TEST(result[0].name == "Overdue");
+  BOOST_CHECK(result[0].name == "Overdue");
 }
 
 BOOST_AUTO_TEST_CASE(FilterBySearchText_CaseInsensitive)
@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(FilterByPriority_ReturnsOnlyMatching)
   s.addTask(makeTask("Med task", storage::Priority::Medium, QDateTime::currentDateTime()));
   const auto result = s.getTasksFiltered("", false, false, storage::Priority::Hard);
   BOOST_REQUIRE(result.size() == 1);
-  BOOST_TEST(result[0].name == "Hard task");
+  BOOST_CHECK(result[0].name == "Hard task");
 }
 
 BOOST_AUTO_TEST_CASE(FilterAll_ReturnsEverything)
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(FilterToday_CombinedWithSearch)
   s.addTask(makeTask("Call today", storage::Priority::Low, QDateTime(today, QTime(9, 0))));
   const auto result = s.getTasksFiltered("buy", true, false, storage::Priority::All);
   BOOST_REQUIRE(result.size() == 1);
-  BOOST_TEST(result[0].name == "Buy milk today");
+  BOOST_CHECK(result[0].name == "Buy milk today");
 }
 
 BOOST_AUTO_TEST_CASE(SortByDate_Ascending)
@@ -195,9 +195,9 @@ BOOST_AUTO_TEST_CASE(SortByDate_Ascending)
   s.addTask(makeTask("Latest", storage::Priority::Low, d3));
   const auto sorted = s.getSortedTasks(s.getAllTasks(), storage::Criterion::Date);
   BOOST_REQUIRE(sorted.size() == 3);
-  BOOST_TEST(sorted[0].name == "Early");
-  BOOST_TEST(sorted[1].name == "Late");
-  BOOST_TEST(sorted[2].name == "Latest");
+  BOOST_CHECK(sorted[0].name == "Early");
+  BOOST_CHECK(sorted[1].name == "Late");
+  BOOST_CHECK(sorted[2].name == "Latest");
 }
 
 BOOST_AUTO_TEST_CASE(SortByPriority_HighestFirst)
@@ -209,9 +209,9 @@ BOOST_AUTO_TEST_CASE(SortByPriority_HighestFirst)
   s.addTask(makeTask("Medium", storage::Priority::Medium, dt));
   const auto sorted = s.getSortedTasks(s.getAllTasks(), storage::Criterion::Priority);
   BOOST_REQUIRE(sorted.size() == 3);
-  BOOST_TEST(sorted[0].name == "Hard");
-  BOOST_TEST(sorted[1].name == "Medium");
-  BOOST_TEST(sorted[2].name == "Low");
+  BOOST_CHECK(sorted[0].name == "Hard");
+  BOOST_CHECK(sorted[1].name == "Medium");
+  BOOST_CHECK(sorted[2].name == "Low");
 }
 
 BOOST_AUTO_TEST_CASE(SortByCompleted_NotDoneFirst)
@@ -222,15 +222,15 @@ BOOST_AUTO_TEST_CASE(SortByCompleted_NotDoneFirst)
   s.addTask(makeTask("Not done", storage::Priority::Low, dt, false));
   const auto sorted = s.getSortedTasks(s.getAllTasks(), storage::Criterion::Completed);
   BOOST_REQUIRE(sorted.size() == 2);
-  BOOST_TEST(sorted[0].name == "Not done");
-  BOOST_TEST(sorted[1].name == "Done");
+  BOOST_CHECK(sorted[0].name == "Not done");
+  BOOST_CHECK(sorted[1].name == "Done");
 }
 
 BOOST_AUTO_TEST_CASE(SortEmptyList_ReturnsEmpty)
 {
   storage::MemoryStorage s;
   const auto sorted = s.getSortedTasks({}, storage::Criterion::Date);
-  BOOST_TEST(sorted.isEmpty());
+  BOOST_CHECK(sorted.isEmpty());
 }
 
 BOOST_AUTO_TEST_CASE(Persistence_SaveAndReload)
@@ -247,8 +247,8 @@ BOOST_AUTO_TEST_CASE(Persistence_SaveAndReload)
     storage::MemoryStorage s;
     const auto all = s.getAllTasks();
     BOOST_REQUIRE(all.size() == 1);
-    BOOST_TEST(all[0].name == "Saved task");
-    BOOST_TEST(all[0].priority == storage::Priority::Medium);
+    BOOST_CHECK(all[0].name == "Saved task");
+    BOOST_CHECK(all[0].priority == storage::Priority::Medium);
   }
 }
 
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE(Persistence_RemoveAndReload)
   {
     storage::MemoryStorage s;
     BOOST_REQUIRE(s.getAllTasks().size() == 1);
-    BOOST_TEST(s.getAllTasks()[0].name == "Keep");
+    BOOST_CHECK(s.getAllTasks()[0].name == "Keep");
   }
 }
 
