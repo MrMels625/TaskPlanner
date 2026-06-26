@@ -1,12 +1,12 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
-#include "serial-utils.hpp"
-#include "istorage.hpp"
 #include <QJsonObject>
 #include <QTemporaryDir>
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonArray>
+#include "serial-utils.hpp"
+#include "istorage.hpp"
 
 static storage::Task fullTask()
 {
@@ -18,7 +18,7 @@ static storage::Task fullTask()
   t.deadline = QDateTime::fromString("2025-06-15T10:00:00", Qt::ISODate);
   t.priority = storage::Priority::Hard;
   t.completed = true;
-  t.tags = {"boost", "qt"};
+  t.tags = { "boost", "qt" };
   return t;
 }
 
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE(TryLoad_ValidFile_ReturnsTrueAndPopulates)
   QTemporaryDir dir;
   BOOST_REQUIRE(dir.isValid());
 
-  const auto t   = fullTask();
+  const auto t = fullTask();
   QJsonArray arr;
   arr.append(storage::serial::taskToJson(t));
 
