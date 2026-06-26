@@ -21,7 +21,6 @@ namespace storage
     QList< Task > getTasksFiltered(const QString &searchText, bool today, bool overdue, Priority priority) const override;
     QList< Task > getSortedTasks(const QList< Task > &tasks, Criterion criterion) const noexcept override;
 
-    // Заглушки функционала геймификации из IStorage
     UserProgress getUserProgress() const override;
     void updateUserProgress(const UserProgress &progress) override;
     void addXP(int amount, const QString &reason) override;
@@ -47,7 +46,6 @@ namespace storage
     void loadFromFile() noexcept override;
     void load() noexcept;
 
-    // Заглушки приватных методов геймификации из IStorage
     void saveGamificationData() noexcept override;
     void loadGamificationData() noexcept override;
   };

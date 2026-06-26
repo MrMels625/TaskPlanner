@@ -223,9 +223,6 @@ void storage::MemoryStorage::loadFromFile() noexcept
   load();
 }
 
-// ---------------------------------------------------------------------------
-// Реализация заглушек геймификации
-// ---------------------------------------------------------------------------
 storage::UserProgress storage::MemoryStorage::getUserProgress() const
 {
   return {};
