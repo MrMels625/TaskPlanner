@@ -1,6 +1,7 @@
 #ifndef ISTORAGE_H
 #define ISTORAGE_H
 #include "task.hpp"
+#include "igamification_storage.hpp"
 
 namespace storage
 {
@@ -28,10 +29,11 @@ namespace storage
     Priority
   };
 
-  class IStorage
+  class IStorage: public IGamificationStorage
   {
   public:
     virtual ~IStorage() = default;
+
     virtual void addTask(const Task &task) = 0;
     virtual void removeTask(int id) = 0;
     virtual void updateTask(const Task &task) = 0;
@@ -45,6 +47,8 @@ namespace storage
   private:
     virtual void saveToFile() noexcept = 0;
     virtual void loadFromFile() noexcept = 0;
+    virtual void saveGamificationData() noexcept = 0;
+    virtual void loadGamificationData() noexcept = 0;
   };
 }
 
