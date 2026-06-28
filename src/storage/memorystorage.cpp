@@ -170,7 +170,7 @@ QList< storage::Task > storage::MemoryStorage::getTasksFiltered(const QString &s
   return result;
 }
 
-QList< storage::Task > storage::MemoryStorage::getSortedTasks(const QList<Task> &tasks, Criterion criterion) const noexcept
+QList< storage::Task > storage::MemoryStorage::getSortedTasks(const QList< Task > &tasks, Criterion criterion) const noexcept
 {
   QList< Task > result(tasks);
   std::stable_sort(result.begin(), result.end(), TaskSorter(criterion));
@@ -252,18 +252,8 @@ void storage::MemoryStorage::unlockAchievement(const QString &achievementId)
   {
     return;
   }
-
-  for (auto &achievement: achievements_)
-  {
-    if (achievement.id == achievementId)
-    {
-      achievement.isUnlocked = true;
-      achievement.unlockedDate = QDate::currentDate();
-      progress_.unlockedAchievements.append(achievementId);
-      addXP(achievement.xpReward, achievementId);
-      return;
-    }
-  }
+  progress_.unlockedAchievements.append(achievementId);
+  saveGamificationData();
 }
 
 bool storage::MemoryStorage::isAchievementUnlocked(const QString &achievementId) const
@@ -302,11 +292,6 @@ bool storage::MemoryStorage::isLocationUnlocked(const QString &locationId) const
   return progress_.unlockedLocations.contains(locationId);
 }
 
-int storage::MemoryStorage::xpForLevel(int level) const noexcept
-{
-  return level * 100;
-}
-
 void storage::MemoryStorage::checkLevelUp() noexcept
 {
   while (progress_.currentXP >= progress_.xpToNextLevel)
@@ -320,13 +305,13 @@ void storage::MemoryStorage::checkLevelUp() noexcept
 void storage::MemoryStorage::initDefaultAchievements() noexcept
 {
   achievements_ = {
-    {"first_task", "First Step", "Complete your first task", "", false, {}, 50},
-    {"streak_3", "On a Roll", "Maintain a 3-day streak", "", false, {}, 75},
-    {"streak_7", "Week Warrior", "Maintain a 7-day streak", "", false, {}, 150},
-    {"tasks_10", "Productive", "Complete 10 tasks", "", false, {}, 100},
-    {"tasks_50", "Overachiever", "Complete 50 tasks", "", false, {}, 300},
-    {"level_5", "Rising Star", "Reach level 5", "", false, {}, 200},
-    {"level_10", "Veteran", "Reach level 10", "", false, {}, 500},
+    { "first_task", "First Step", "Complete your first task", "", false, {}, 50 },
+    { "streak_3", "On a Roll", "Maintain a 3-day streak", "", false, {}, 75 },
+    { "streak_7", "Week Warrior", "Maintain a 7-day streak", "", false, {}, 150 },
+    { "tasks_10", "Productive", "Complete 10 tasks", "", false, {}, 100 },
+    { "tasks_50", "Overachiever", "Complete 50 tasks", "", false, {}, 300 },
+    { "level_5", "Rising Star", "Reach level 5", "", false, {}, 200 },
+    { "level_10", "Veteran", "Reach level 10", "", false, {}, 500 },
   };
 }
 
@@ -441,56 +426,3 @@ void storage::MemoryStorage::loadGamificationData() noexcept
   }
 }
 
-void storage::MemoryStorage::serializeProgress() const
-{
-  QJsonArray achievementsArray;
-  for (const Achievement &a: achievements_)
-  {
-    achievementsArray.append(serial::achievementToJson(a));
-  }
-
-  QJsonObject root;
-  root["progress"] = serial::progressToJson(progress_);
-  root["achievements"] = achievementsArray;
-
-  const QByteArray data = QJsonDocument(root).toJson(QJsonDocument::Indented);
-  const QString main = serial::filePath(serial::k_gamificationFileName);
-
-  QFile f(main);
-  if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate))
-  {
-    return;
-  }
-
-  f.write(data);
-  f.close();
-}
-
-void storage::MemoryStorage::deserializeProgress(const QJsonObject &obj)
-{
-  if (obj.contains("progress"))
-  {
-    progress_ = serial::progressFromJson(obj["progress"].toObject());
-  }
-
-  if (obj.contains("achievements"))
-  {
-    for (const QJsonValue &v: obj["achievements"].toArray())
-    {
-      if (!v.isObject())
-      {
-        continue;
-      }
-      const Achievement loaded = serial::achievementFromJson(v.toObject());
-      for (auto &existing: achievements_)
-      {
-        if (existing.id == loaded.id)
-        {
-          existing.isUnlocked = loaded.isUnlocked;
-          existing.unlockedDate = loaded.unlockedDate;
-          break;
-        }
-      }
-    }
-  }
-}

@@ -5,7 +5,6 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include "istorage.hpp"
 
 QString storage::serial::filePath(const QString &name)
 {
@@ -26,7 +25,7 @@ QJsonObject storage::serial::taskToJson(const Task &task)
   obj["description"] = task.description;
   obj["discipline"] = task.discipline;
   obj["deadline"] = task.deadline.toString(Qt::ISODate);
-  obj["priority"] = static_cast<int>(task.priority);
+  obj["priority"] = static_cast< int >(task.priority);
   obj["completed"] = task.completed;
   obj["tags"] = tagsArray;
   return obj;

@@ -1,9 +1,9 @@
-#ifndef STORAGE_SERIALIZATION_HPP
-#define STORAGE_SERIALIZATION_HPP
+#ifndef SERIAL_UTILS_HPP
+#define SERIAL_UTILS_HPP
 #include <QJsonObject>
 #include <QString>
 #include "task.hpp"
-#include "igamification_storage.hpp"
+#include "istorage.hpp"
 
 namespace storage
 {

@@ -45,7 +45,6 @@ namespace storage
     UserProgress progress_;
     QList< Achievement > achievements_;
 
-    int xpForLevel(int level) const noexcept;
     void checkLevelUp() noexcept;
     void initDefaultAchievements() noexcept;
 
@@ -53,8 +52,6 @@ namespace storage
     void loadFromFile() noexcept override;
     void saveGamificationData() noexcept override;
     void loadGamificationData() noexcept override;
-    void serializeProgress() const override;
-    void deserializeProgress(const QJsonObject &obj) override;
     void load() noexcept;
   };
 }
