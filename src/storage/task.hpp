@@ -16,6 +16,7 @@ namespace storage
     QString description;
     QString discipline;
     QDateTime deadline;
+    QDateTime completedAt;
     Priority priority;
     bool completed;
     QList< QString > tags;

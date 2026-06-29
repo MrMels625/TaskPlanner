@@ -36,6 +36,7 @@ namespace storage
     int currentXP;
     int xpToNextLevel;
     int streakDays;
+    int deletedTasksCount;
     QDate lastActivityDate;
     QString currentTitle;
     QList< QString > unlockedAchievementIds;
