@@ -21,13 +21,21 @@ namespace
       switch (criterion)
       {
       case storage::Criterion::Date:
+      {
         return a.deadline < b.deadline;
+      }
       case storage::Criterion::Priority:
+      {
         return a.priority > b.priority;
+      }
       case storage::Criterion::Completed:
+      {
         return a.completed < b.completed;
+      }
       default:
+      {
         return false;
+      }
       }
     }
   };
@@ -56,18 +64,22 @@ namespace
       {
         return false;
       }
+
       if (today && task.deadline.date() != currentDate)
       {
         return false;
       }
+
       if (overdue && (task.completed || task.deadline >= now))
       {
         return false;
       }
+
       if (priority != storage::Priority::All && task.priority != priority)
       {
         return false;
       }
+
       return true;
     }
   };
@@ -143,7 +155,7 @@ void storage::MemoryStorage::removeTask(int id)
   }
 }
 
-void storage::MemoryStorage::updateTask(const Task &task)
+void storage::MemoryStorage::updateTask(Task &task)
 {
   for (auto &t: tasks_)
   {

@@ -121,7 +121,7 @@ bool storage::serial::tryLoad(const QString &path, QList< Task > &tasks, int &ne
 QJsonObject storage::serial::progressToJson(const UserProgress &progress)
 {
   QJsonArray unlockedAchievements;
-  for (const QString &id: progress.unlockedAchievements)
+  for (const QString &id: progress.unlockedAchievementIds)
   {
     unlockedAchievements.append(id);
   }
@@ -156,7 +156,7 @@ storage::UserProgress storage::serial::progressFromJson(const QJsonObject &obj)
 
   for (const QJsonValue &v: obj["unlockedAchievements"].toArray())
   {
-    progress.unlockedAchievements.append(v.toString());
+    progress.unlockedAchievementIds.append(v.toString());
   }
 
   for (const QJsonValue &v: obj["unlockedLocations"].toArray())
@@ -174,8 +174,6 @@ QJsonObject storage::serial::achievementToJson(const Achievement &achievement)
   obj["name"] = achievement.name;
   obj["description"] = achievement.description;
   obj["iconPath"] = achievement.iconPath;
-  obj["isUnlocked"] = achievement.isUnlocked;
-  obj["unlockedDate"] = achievement.unlockedDate.toString(Qt::ISODate);
   obj["xpReward"] = achievement.xpReward;
   return obj;
 }
@@ -187,8 +185,6 @@ storage::Achievement storage::serial::achievementFromJson(const QJsonObject &obj
   achievement.name = obj["name"].toString();
   achievement.description = obj["description"].toString();
   achievement.iconPath = obj["iconPath"].toString();
-  achievement.isUnlocked = obj["isUnlocked"].toBool(false);
-  achievement.unlockedDate = QDate::fromString(obj["unlockedDate"].toString(), Qt::ISODate);
   achievement.xpReward = obj["xpReward"].toInt(0);
   return achievement;
 }
@@ -217,7 +213,7 @@ bool storage::serial::tryLoadGamification(const QString &path, UserProgress &pro
 
   progress = progressFromJson(root["progress"].toObject());
 
-  QList<Achievement> loaded;
+  QList< Achievement > loaded;
   for (const QJsonValue &v: root["achievements"].toArray())
   {
     if (!v.isObject())
