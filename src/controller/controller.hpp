@@ -1,0 +1,62 @@
+#ifndef CONTROLLER_HPP
+#define CONTROLLER_HPP
+
+#include "icontroller.hpp"
+#include "../storage/task.hpp"
+#include "../storage/istorage.hpp"
+#include "../view/iview.hpp"
+
+namespace controller
+{
+  class Controller: public IController
+  {
+    Q_OBJECT
+
+  public:
+    explicit Controller(QObject *parent = nullptr);
+    ~Controller() override = default;
+
+    void setStorage(storage::IStorage *storage) override;
+    void setView(view::IView *view) override;
+    void start() override;
+
+  public slots:
+    void onViewReady() override;
+    void onTaskAddRequested(const storage::Task &task) override;
+    void onTaskEditRequested(int taskId) override;
+    void onTaskViewRequested(int taskId);
+    void onTaskUpdateRequested(const storage::Task &task) override;
+    void onTaskDeleteRequested(int taskId) override;
+    void onCompleteRequested(int taskId) override;
+    void onDateSelected(const QDate &date) override;
+    void onSortRequested(storage::Criterion criterion) override;
+    void onFilterChanged(storage::Filter filter, const QVariant &value) override;
+
+    void onTaskCompleted(int taskId) override;
+    void onDailyTasksCompleted() override;
+    void onAchievementsRequested() override;
+    void onMapRequested() override;
+    void onStatisticsRequested() override;
+    void onNewDay(const QDate &date) override;
+    void onApplicationStart() override;
+    void onCheckAchievements() override;
+    void onCalculateXP(int taskId) override;
+
+  private:
+    bool checkReady() const;
+    bool validateTask(const storage::Task &task) const;
+    void refreshView();
+    void updateStats();
+    static bool priorityMatches(storage::Priority taskPriority, storage::Priority filterPriority);
+
+    storage::IStorage *m_storage;
+    view::IView *m_view;
+    storage::Filter m_scopeFilter;
+    storage::Priority m_priorityFilter;
+    storage::Criterion m_activeCriterion;
+    bool m_dateSelected;
+    QDate m_selectedDate;
+  };
+}
+
+#endif

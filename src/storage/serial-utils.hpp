@@ -14,6 +14,8 @@ namespace storage
     inline constexpr auto k_gamificationFileName = "gamification.json";
     inline constexpr auto k_gamificationFileNameBackup = "gamification.backup.json";
 
+    void setBaseDirOverride(const QString &path);
+
     QString filePath(const QString &name);
 
     QJsonObject taskToJson(const Task &task);

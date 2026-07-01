@@ -67,7 +67,11 @@ namespace storage
     void saveGamificationData() noexcept override;
     void loadGamificationData() noexcept override;
     void load() noexcept;
+
+    void saveGamificationData() noexcept override;
+    void loadGamificationData() noexcept override;
   };
 }
 
 #endif
+

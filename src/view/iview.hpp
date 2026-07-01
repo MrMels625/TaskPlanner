@@ -3,35 +3,46 @@
 
 #include <QDate>
 #include <QList>
-#include <QObject>
+#include <QString>
+#include <QVariant>
+
 #include "../storage/istorage.hpp"
 #include "../storage/task.hpp"
 
 namespace view
 {
-  class IView: public QObject
-  {
-    Q_OBJECT
 
+  class IView
+  {
   public:
     virtual ~IView() = default;
+
     virtual void showTaskList(const QList< storage::Task > &tasks) = 0;
     virtual void showTasksForDate(const QDate &date, const QList< storage::Task > &tasks) = 0;
+    virtual void setTaskListTitle(const QString &title) = 0;
     virtual void showTaskCreationForm() = 0;
+    virtual void showTaskCreationForm(const storage::Task &task) = 0;
+    virtual void closeTaskCreationForm() = 0;
     virtual void showErrorMessage(const QString &message) = 0;
     virtual void showInfoMessage(const QString &message) = 0;
+    virtual void updateStats(int total, int completed, int today) = 0;
 
-  signals:
-    void viewReady();
-    void taskAddRequested(const storage::Task &task);
-    void taskEditRequested(int taskID);
-    void taskUpdateRequested(const storage::Task &task);
-    void taskDeleteRequested(int taskId);
-    void taskCompleteRequested(int taskId);
-    void dateSelected(const QDate &date);
-    void sortRequested(storage::Criterion criterion);
-    void filterChanged(storage::Filter filter, const QVariant &value);
+    virtual void showUserLevel(int level, int currentXP, int xpToNext) = 0;
+    virtual void showStreak(int days) = 0;
+    virtual void showUserTitle(const QString &title) = 0;
+    virtual void showXPNotification(int amount, const QString &reason) = 0;
+
+    virtual void showAchievementUnlocked(const storage::Achievement &achievement) = 0;
+    virtual void showAchievementsList(const QList< storage::Achievement > &achievements) = 0;
+
+    virtual void showCampusMap(const QList< QString > &unlockedLocations) = 0;
+    virtual void showLocationUnlocked(const QString &locationName) = 0;
+
+    virtual void showLevelUpAnimation(int newLevel, const QString &newTitle) = 0;
+
+    virtual void updateGamificationPanel() = 0;
   };
+
 }
 
 #endif
